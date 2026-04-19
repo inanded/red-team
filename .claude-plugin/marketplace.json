@@ -1,0 +1,45 @@
+{
+  "name": "red-team",
+  "owner": {
+    "name": "Matt Wemyss",
+    "email": "matthewwemyss17@gmail.com"
+  },
+  "metadata": {
+    "description": "Multi-persona security review pack for Claude Code — twelve reviewer personas, a coordinator, a recon scout, seven shared skills and seven stack adapters",
+    "version": "1.0.0",
+    "repository": "https://github.com/inanded/red-team"
+  },
+  "plugins": [
+    {
+      "name": "red-team",
+      "description": "Run a full security review of the current project: recon, interactive persona selection, parallel execution across up to twelve reviewer personas, consolidated ranked report with cross-persona attack chains and a threat-model declaration.",
+      "source": "./",
+      "strict": false,
+      "agents": [
+        "./agents/red-team-coordinator.md",
+        "./agents/recon-scout.md",
+        "./agents/red-team/external-attacker.md",
+        "./agents/red-team/malicious-user.md",
+        "./agents/red-team/malicious-insider.md",
+        "./agents/red-team/payment-abuser.md",
+        "./agents/red-team/social-supply-chain.md",
+        "./agents/red-team/crypto-secrets-auditor.md",
+        "./agents/red-team/compliance-auditor.md",
+        "./agents/red-team/cloud-infra-attacker.md",
+        "./agents/red-team/ai-llm-attacker.md",
+        "./agents/red-team/race-condition-hunter.md",
+        "./agents/red-team/api-versioning-attacker.md",
+        "./agents/red-team/observability-attacker.md"
+      ],
+      "skills": [
+        "./skills/attack-hypothesis",
+        "./skills/severity-scoring",
+        "./skills/effort-estimation",
+        "./skills/confirmed-safe-tracking",
+        "./skills/threat-modeling",
+        "./skills/exploit-chain-mapping",
+        "./skills/attack-surface-discovery"
+      ]
+    }
+  ]
+}

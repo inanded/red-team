@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & ideas
+    url: https://github.com/ruvnet/red-team/discussions
+    about: Ask questions, share ideas, and discuss the pack with the community.
+  - name: Security disclosure
+    url: https://github.com/ruvnet/red-team/blob/main/SECURITY.md
+    about: Report a vulnerability in the pack itself privately via the SECURITY.md process.

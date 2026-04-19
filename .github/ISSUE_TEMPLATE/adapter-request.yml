@@ -1,0 +1,56 @@
+name: Adapter request
+description: Request a new stack adapter (auth provider, data layer, payment provider, etc.)
+title: "[adapter] <stack-name>"
+labels: ["adapter", "triage"]
+body:
+  - type: input
+    id: stack
+    attributes:
+      label: Stack name
+      description: Short slug for the adapter directory, e.g. "auth0-postgres" or "firebase"
+      placeholder: "provider-datalayer"
+    validations:
+      required: true
+  - type: textarea
+    id: components
+    attributes:
+      label: Component list
+      description: Which specific services / libraries does this adapter cover
+      placeholder: |
+        - Auth: ...
+        - Data: ...
+        - Payments: ...
+        - AI: ...
+        - Infra: ...
+    validations:
+      required: true
+  - type: textarea
+    id: discovery
+    attributes:
+      label: Discovery signals
+      description: How would a script auto-detect that a project uses this stack (package names, config files, env var patterns)
+    validations:
+      required: true
+  - type: textarea
+    id: overrides
+    attributes:
+      label: Persona overrides needed
+      description: Which of the 12 personas need stack-specific deltas, and what the main delta is for each
+    validations:
+      required: true
+  - type: input
+    id: docs
+    attributes:
+      label: Official documentation URL
+      description: Primary vendor documentation link reviewers should reference
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have checked adapters/ for an existing adapter that covers this stack
+          required: true
+        - label: I am willing to help review a PR that implements this adapter
+          required: false

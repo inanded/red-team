@@ -1,0 +1,52 @@
+# Local Claude Code dev tooling — do not ship
+.claude/
+.claude-flow/
+.mcp.json
+
+# Node
+node_modules/
+coverage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Generated red-team output (from running the pack on this repo itself)
+docs/red-team-*/
+docs/red-team-*.md
+
+# Env files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+# Keep the example
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+dist/
+build/
+.next/
+out/
+
+# Test artifacts
+.nyc_output/
+
+# Fixture-specific (fixture has its own .gitignore but be safe)
+examples/vulnerable-fixture/.env
+examples/vulnerable-fixture/.env.local
+examples/vulnerable-fixture/node_modules/
+examples/vulnerable-fixture/.next/

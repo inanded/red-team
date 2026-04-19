@@ -1,0 +1,59 @@
+name: Bug report
+description: Report a defect in the red-team pack (agent prompt, script, validator, adapter, docs).
+title: "[bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please include enough detail for us to reproduce it locally.
+        For security issues in the pack itself, use the SECURITY.md process instead.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the observed behaviour and what you expected instead.
+      placeholder: "Running `npm run validate:all` failed because ..."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Minimal steps to reproduce. Include commands, file snippets, or links.
+      placeholder: |
+        1. clone the repo
+        2. run `npm ci`
+        3. run `npm run validate:refs`
+        4. observe error
+    validations:
+      required: true
+  - type: input
+    id: claude-code-version
+    attributes:
+      label: Claude Code version
+      description: Output of `claude --version`.
+      placeholder: "1.x.y"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "macOS 14.5 / Ubuntu 24.04 / Windows 11"
+    validations:
+      required: true
+  - type: input
+    id: pack-version
+    attributes:
+      label: Pack version
+      description: Git tag, branch, or commit SHA of red-team you are running.
+      placeholder: "v1.0.0 or commit abcdef1"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste any error output. Do not include secrets.
+      render: shell

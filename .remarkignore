@@ -1,0 +1,13 @@
+.claude/
+.claude-flow/
+node_modules/
+coverage/
+dist/
+build/
+.next/
+out/
+docs/red-team-*/
+docs/red-team-*.md
+examples/vulnerable-fixture/node_modules/
+examples/vulnerable-fixture/.next/
+.github/PULL_REQUEST_TEMPLATE.md

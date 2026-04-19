@@ -1,0 +1,50 @@
+{
+  "name": "red-team-pack",
+  "version": "1.0.0",
+  "private": false,
+  "license": "MIT",
+  "description": "Reusable Claude Code red-team agent pack: multi-persona security review for web and API SaaS codebases.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "red-team": "./bin/red-team.mjs"
+  },
+  "files": [
+    "agents",
+    "skills",
+    "adapters",
+    "bin",
+    "scripts/install.sh",
+    "scripts/install.ps1",
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "README.md",
+    "SECURITY.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inanded/red-team.git"
+  },
+  "scripts": {
+    "validate:frontmatter": "node scripts/validate-frontmatter.mjs",
+    "validate:refs": "node scripts/check-cross-refs.mjs",
+    "validate:structure": "node scripts/validate-structure.mjs",
+    "lint": "remark . --frail --quiet",
+    "validate:all": "npm run validate:frontmatter && npm run lint && npm run validate:refs && npm run validate:structure",
+    "validate": "npm run validate:all",
+    "generate:persona-index": "node scripts/generate-persona-index.mjs",
+    "test:smoke": "node scripts/smoke-test.mjs"
+  },
+  "devDependencies": {
+    "glob": "^10.0.0",
+    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.0",
+    "remark-cli": "^12.0.0",
+    "remark-preset-lint-recommended": "^7.0.0"
+  }
+}

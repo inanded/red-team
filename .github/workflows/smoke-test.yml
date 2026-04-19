@@ -1,0 +1,31 @@
+name: smoke-test
+
+on:
+  pull_request:
+    paths:
+      - "agents/**"
+      - "skills/**"
+      - "examples/vulnerable-fixture/**"
+  schedule:
+    - cron: "0 6 * * *"
+
+jobs:
+  smoke:
+    name: Smoke-test against vulnerable fixture
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run smoke test
+        run: npm run test:smoke

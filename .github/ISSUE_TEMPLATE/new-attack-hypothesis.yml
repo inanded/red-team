@@ -1,0 +1,61 @@
+name: New review hypothesis
+description: Propose a new hypothesis to add to an existing persona checklist
+title: "[hypothesis] <persona>: <short title>"
+labels: ["hypothesis", "triage"]
+body:
+  - type: dropdown
+    id: persona
+    attributes:
+      label: Which persona
+      description: Which persona file this hypothesis belongs under
+      options:
+        - external-attacker
+        - malicious-user
+        - malicious-insider
+        - payment-abuser
+        - social-supply-chain
+        - crypto-secrets-auditor
+        - compliance-auditor
+        - cloud-infra-attacker
+        - ai-llm-attacker
+        - race-condition-hunter
+        - api-versioning-attacker
+        - observability-attacker
+    validations:
+      required: true
+  - type: textarea
+    id: hypothesis
+    attributes:
+      label: Hypothesis
+      description: One sentence describing the condition the reviewer is checking for
+      placeholder: "If X is present in the codebase, Y control may be missing, which would allow Z."
+    validations:
+      required: true
+  - type: textarea
+    id: signals
+    attributes:
+      label: Code signals to search for
+      description: Concrete grep or glob patterns a reviewer would use to find the condition
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Example finding (optional)
+      description: A redacted path and snippet from a real codebase where this hypothesis applied
+  - type: input
+    id: fixture
+    attributes:
+      label: Fixture case to add
+      description: A short description of the case to plant in examples/vulnerable-fixture/ so smoke tests cover this hypothesis
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have read CONTRIBUTING.md
+          required: true
+        - label: I have confirmed this hypothesis is not already listed in the persona file
+          required: true

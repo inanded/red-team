@@ -1,0 +1,49 @@
+name: Propose a new persona
+description: Suggest a new red-team persona covering a threat model the current personas miss.
+title: "[persona] "
+labels: [new-persona]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A new persona must have a distinct threat model, at least 6 concrete hypotheses, and a planted fixture vuln.
+        See `CONTRIBUTING.md` for the persona authoring guide.
+  - type: input
+    id: persona-name
+    attributes:
+      label: Persona name
+      description: kebab-case, unique across the pack.
+      placeholder: "billing-fraudster"
+    validations:
+      required: true
+  - type: textarea
+    id: threat-model
+    attributes:
+      label: Threat model
+      description: Who is this persona? What assumptions do they make? What access do they have?
+    validations:
+      required: true
+  - type: textarea
+    id: gap
+    attributes:
+      label: Why existing personas don't cover this
+      description: Point at overlaps with the current 12 and explain the residual gap.
+    validations:
+      required: true
+  - type: textarea
+    id: hypotheses
+    attributes:
+      label: Proposed hypotheses
+      description: List 6 to 10 concrete, file-anchored attack ideas.
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: fixture-vuln
+    attributes:
+      label: Proposed fixture planted issue
+      description: Describe the planted vuln you would add to `examples/vulnerable-fixture/` to exercise at least one hypothesis.
+    validations:
+      required: true
