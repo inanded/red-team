@@ -30,7 +30,7 @@ Open a terminal, go to your project folder, and run **one command**:
 
 ```bash
 cd your-project
-npx @inanded/red-team
+npx @matthewwemyss/red-team
 ```
 
 `npx` is already included with Node.js. It downloads this pack, copies the twelve reviewers and seven shared rulebooks into `your-project/.claude/`, and then gets out of the way. Nothing is installed system-wide. To uninstall later, just delete the `.claude/` folder.
@@ -180,19 +180,19 @@ One command installs the full pack — coordinator, recon scout, all twelve pers
 
 ```bash
 # Install the full pack
-npx @inanded/red-team
+npx @matthewwemyss/red-team
 
 # Install the full pack plus a stack adapter
-npx @inanded/red-team --adapter supabase-stripe-nextjs
+npx @matthewwemyss/red-team --adapter supabase-stripe-nextjs
 
 # Install only a subset of personas
-npx @inanded/red-team --personas external-attacker,malicious-user
+npx @matthewwemyss/red-team --personas external-attacker,malicious-user
 
 # Install only the skills (skips the agents)
-npx @inanded/red-team --only-skills
+npx @matthewwemyss/red-team --only-skills
 
 # List everything the pack exposes
-npx @inanded/red-team --list
+npx @matthewwemyss/red-team --list
 ```
 
 Everything lands in `./.claude/agents/` and `./.claude/skills/` (and `./.claude/red-team-adapters/<slug>/` if you pass `--adapter`). No global install, no symlinks.

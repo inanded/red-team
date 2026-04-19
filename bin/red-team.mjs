@@ -6,12 +6,12 @@
 // Optionally copies one stack adapter.
 //
 // Usage:
-//   npx @inanded/red-team                          install everything
-//   npx @inanded/red-team --adapter <slug>         also copy one adapter
-//   npx @inanded/red-team --personas a,b,c         only the named personas
-//   npx @inanded/red-team --skills a,b             only the named skills
-//   npx @inanded/red-team --list                   list available agents, skills, adapters
-//   npx @inanded/red-team --help                   show usage
+//   npx @matthewwemyss/red-team                          install everything
+//   npx @matthewwemyss/red-team --adapter <slug>         also copy one adapter
+//   npx @matthewwemyss/red-team --personas a,b,c         only the named personas
+//   npx @matthewwemyss/red-team --skills a,b             only the named skills
+//   npx @matthewwemyss/red-team --list                   list available agents, skills, adapters
+//   npx @matthewwemyss/red-team --help                   show usage
 //
 // Runs anywhere Node 18+ runs. Zero dependencies.
 
@@ -44,7 +44,7 @@ function printHelp() {
   console.log(`red-team — project-scoped installer
 
 Usage
-  npx @inanded/red-team [options]
+  npx @matthewwemyss/red-team [options]
 
 Options
   --adapter <slug>           also copy a stack adapter
@@ -58,10 +58,10 @@ Options
 Default: installs every agent and every skill into ./.claude/
 
 Examples
-  npx @inanded/red-team
-  npx @inanded/red-team --adapter supabase-stripe-nextjs
-  npx @inanded/red-team --personas external-attacker,malicious-user
-  npx @inanded/red-team --only-skills
+  npx @matthewwemyss/red-team
+  npx @matthewwemyss/red-team --adapter supabase-stripe-nextjs
+  npx @matthewwemyss/red-team --personas external-attacker,malicious-user
+  npx @matthewwemyss/red-team --only-skills
 `);
 }
 
@@ -93,7 +93,7 @@ function parseArgs(argv) {
     else if (a === "add") continue;
     else {
       console.error("unknown argument: " + a);
-      console.error("run `npx @inanded/red-team --help` for usage");
+      console.error("run `npx @matthewwemyss/red-team --help` for usage");
       process.exit(1);
     }
   }
@@ -176,7 +176,7 @@ function main() {
     const unknown = args.personas.filter((p) => !PERSONAS.includes(p));
     if (unknown.length) {
       console.error("unknown personas: " + unknown.join(", "));
-      console.error("run `npx @inanded/red-team --list` to see valid names");
+      console.error("run `npx @matthewwemyss/red-team --list` to see valid names");
       process.exit(1);
     }
   }
@@ -184,7 +184,7 @@ function main() {
     const unknown = args.skills.filter((s) => !SKILLS.includes(s));
     if (unknown.length) {
       console.error("unknown skills: " + unknown.join(", "));
-      console.error("run `npx @inanded/red-team --list` to see valid names");
+      console.error("run `npx @matthewwemyss/red-team --list` to see valid names");
       process.exit(1);
     }
   }
