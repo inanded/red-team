@@ -1,15 +1,38 @@
 {
-  "name": "red-team-pack",
+  "name": "@inanded/red-team",
   "version": "1.0.0",
   "private": false,
   "license": "MIT",
-  "description": "Reusable Claude Code red-team agent pack: multi-persona security review for web and API SaaS codebases.",
+  "description": "Claude Code security-review pack: twelve reviewer personas, coordinator, recon scout, seven skills, and seven stack adapters.",
+  "keywords": [
+    "claude-code",
+    "claude",
+    "security",
+    "red-team",
+    "security-review",
+    "agent-skills",
+    "ai-agents",
+    "static-analysis",
+    "code-review"
+  ],
+  "homepage": "https://github.com/inanded/red-team#readme",
+  "bugs": {
+    "url": "https://github.com/inanded/red-team/issues"
+  },
+  "author": {
+    "name": "Matt Wemyss",
+    "email": "matthewwemyss17@gmail.com",
+    "url": "https://github.com/inanded"
+  },
   "type": "module",
   "engines": {
     "node": ">=18"
   },
   "bin": {
     "red-team": "./bin/red-team.mjs"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "files": [
     "agents",
