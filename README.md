@@ -1,10 +1,71 @@
 # Red Team — Security Review Pack for Claude Code
 
-A reviewer pack that red-teams any web or API codebase from twelve different threat-model viewpoints. Runs inside Claude Code. Read-only by design. Every finding cites `path:line`, a concrete walkthrough, the impact, and a one-line fix.
+**A second pair of eyes on your codebase, run by twelve specialised AI reviewers.**
 
-Built for engineers who want a second set of eyes on their application before a launch, after an incident, or as a quarterly deep-dive. Works with Claude Code 1.x+, and the skills conform to the [Agent Skills specification](https://agentskills.io) so they are portable to any compatible agent.
+Point it at your project and within 10–20 minutes you get a prioritised list of the most likely security issues — each one with the exact file and line, a plain-English walkthrough, and a one-line fix. It runs entirely inside Claude Code, only reads your code (never writes or calls external services), and costs a few dollars of API usage per run.
 
-Found a bug in the pack? [Open an issue](https://github.com/inanded/red-team/issues). Want a new persona, skill, or adapter? [Open a PR](#contributing) — the issue templates give you a structured start.
+Not a replacement for a real security audit or for tools like Snyk. Think of it as a thorough first pass that catches the obvious things before a human reviewer gets involved.
+
+Found a bug? [Open an issue](https://github.com/inanded/red-team/issues). Want a new persona, skill, or adapter? [Open a PR](#contributing).
+
+---
+
+## New here? Start with this
+
+This section is for first-time users. If you already use Claude Code daily, [skip to the full install options](#install).
+
+### 1. Prerequisites (one-time setup)
+
+You need three things installed on your machine:
+
+- **[Claude Code](https://docs.claude.com/claude-code)** — the CLI app from Anthropic. Open a terminal and type `claude --version`; if it prints a version number, you are set.
+- **[Node.js 18 or later](https://nodejs.org)** — needed for the install command. Type `node --version`; if it prints `v18.x` or higher, you are set.
+- **A project to review** — any folder with source code. Git-tracked is recommended but not required.
+
+If any of those are missing, install them first and come back.
+
+### 2. Install the pack into your project
+
+Open a terminal, go to your project folder, and run **one command**:
+
+```bash
+cd your-project
+npx inanded/red-team
+```
+
+`npx` is already included with Node.js. It downloads this pack, copies the twelve reviewers and seven shared rulebooks into `your-project/.claude/`, and then gets out of the way. Nothing is installed system-wide. To uninstall later, just delete the `.claude/` folder.
+
+### 3. Run your first review
+
+In the same project folder, start Claude Code:
+
+```bash
+claude
+```
+
+Once you see the Claude Code prompt, type or paste:
+
+```
+run the red-team-coordinator against this project
+```
+
+What happens next:
+
+- Claude Code asks if it is okay to let the coordinator and the personas run. Say yes.
+- The **recon-scout** reads your project and prints a short summary (framework, auth provider, payments, AI usage, infrastructure). This takes about one minute.
+- The coordinator shows you a **three-bucket table** — Recommended, Optional, Skipped — of personas it wants to run. Usually you can just confirm; you can untick or tick whichever you like.
+- Up to twelve personas run in parallel. You will see progress messages. This takes 10–20 minutes on a medium codebase.
+- When finished, Claude Code prints a short summary and writes the full report to `docs/red-team-<today>.md` in your project folder.
+
+### 4. Read the report
+
+Open `docs/red-team-<today>.md`. The top section ("TL;DR") names the single most urgent fix in one sentence. Under that is a ranked table — start at the top and work your way down. Each row links to the file and line you need to change, and names the fix.
+
+You do not need to act on every finding in one sitting. Pick the top three, fix them, re-run the pack a week later, watch those rows disappear.
+
+That is the whole workflow. The rest of this README is reference material — what each persona does, the different install options, adapters for specific stacks, the contributor guide.
+
+---
 
 ## What is this pack?
 
@@ -109,7 +170,9 @@ New stack? Copy `adapters/_template/` and fill in the scaffolding. See [adapters
 
 ## Install
 
-All three install options are **project-scoped**. Nothing is written at user level. Two projects on the same machine can hold different versions. Deleting `./.claude/` uninstalls the pack.
+**Not sure which to pick? → Use Option 1.** It is the shortest path and it installs the full pack.
+
+All three options are **per-project** — they only add files inside the folder you run them in. Nothing is installed system-wide, so different projects can use different versions, and deleting `./.claude/` uninstalls the pack completely.
 
 ### Option 1 — CLI install (recommended)
 
@@ -260,6 +323,25 @@ WITH CHECK. Fix that migration first; it breaks the chain.
 
 The output is committed (or not) at your discretion. The recommended `.gitignore` pattern keeps the reports local; copy that pattern to your project if you prefer.
 
+## What to do with the report
+
+You do not need to act on every finding in one go. A good workflow is:
+
+1. **Read the TL;DR first.** It names the single most urgent fix in one sentence. If you only have 30 minutes today, start there.
+2. **Work top-down through the ranked table.** The coordinator already ordered findings by severity, reachability, and effort — the top rows are the highest reward-per-hour. Don't skip ahead.
+3. **Open the file at the line the finding points at.** Every finding cites `path:line`. The fix column names the change to make. If you disagree with the finding, note it — the coordinator sometimes flags defence-in-depth gaps that your team has decided to accept.
+4. **Re-run the pack after each round of fixes.** Deleting a finding from the top of the list often unblocks several findings below it — the coordinator marks cross-persona chains so you can see this.
+5. **Save the "confirmed safe" section.** It lists surfaces the pack checked and found to be correctly defended. That list is your regression-protection baseline — paste it into your code review checklist for future PRs touching those areas.
+6. **Share chains, not individual findings, with your team.** A chain like "outsider → weak token → admin access" is easier to communicate and justify than three separate medium-severity bullets.
+
+If a finding is unclear, ask Claude Code inside the project:
+
+```
+explain finding #3 in docs/red-team-<date>.md in plain English, and show me the exact code change
+```
+
+The pack's shared `attack-hypothesis` skill is already loaded, so Claude Code will produce a walkthrough grounded in the file it cited.
+
 ## Frequently asked questions
 
 - **Is it safe to run on my production codebase?** Yes. Every persona is read-only. No live network probes, no writes to anything except `docs/red-team-<date>/`.
@@ -297,6 +379,35 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full checklist. Short version:
 ## What this is not
 
 This is not a SAST replacement, not an SCA tool, not a runtime scanner. It is a focused-attacker code review, run by LLMs, scoped by threat model. Use it alongside Snyk, Semgrep, OWASP ASVS, and a human reviewer — not in place of them.
+
+## Glossary
+
+Plain-English definitions for the jargon used throughout the reports and this README.
+
+| Term | What it means |
+|---|---|
+| **Red team** | A review where someone plays the attacker and looks for ways in, rather than reviewing correctness or style. |
+| **Persona** | In this pack, a specialised reviewer focused on one threat model (for example, the "payment-abuser" persona only checks billing and webhook code). |
+| **Sub-agent** | A Claude Code feature — a smaller agent that the main session can spawn to do a focused job. Each persona is a sub-agent. |
+| **Finding** | A specific issue the reviewer reports. Every finding in this pack has a file, a line, a one-sentence fix, and a severity. |
+| **Severity** | How bad a finding is. Four levels: CRITICAL, HIGH, MED, LOW. Scored from three axes — impact, how easily it is reached, and how reliably it works. |
+| **Effort** | How long a fix should take. Three buckets: S (under one hour), M (one to four hours), L (four to sixteen hours). |
+| **Chain** | Two or more findings that combine into something worse than any of them alone. For example, a weak invite code plus an RLS gap can let an outsider become an admin. |
+| **Threat model** | A short written statement of who might attack the system and what they are trying to achieve. The pack writes a threat-model declaration at the top of every report. |
+| **Adapter** | A stack-specific overlay (for example, `supabase-stripe-nextjs`) that layers extra hypotheses onto the core personas for your exact providers. |
+| **RLS** (Row-Level Security) | A Postgres feature where database rows are filtered by policy, not just application code. Supabase relies on it heavily. A missing `WITH CHECK` on an `UPDATE` policy is a classic bug. |
+| **IDOR** (Insecure Direct Object Reference) | When `/api/reports/42` returns report 42 without checking whether you own it. |
+| **TOCTOU** (Time-of-Check to Time-of-Use) | When the code checks a condition, then acts on it, and between those two moments the state changes — letting two simultaneous requests both pass the check. |
+| **Mass assignment** | When a handler spreads a request body directly into an update, letting a caller set fields they should not be able to — for example, promoting themselves to admin. |
+| **Idempotency** | A property where doing the same operation twice produces the same result as doing it once. Important for webhooks that can be retried. |
+| **Webhook** | An HTTP call a third-party service makes into your app when something happens (for example, Stripe calls your `/webhooks/stripe` when a payment succeeds). |
+| **CRLF injection** | Sneaking `\r\n` characters into a string that ends up in an HTTP or email header, which lets an attacker inject extra headers. |
+| **Prompt injection** | User-supplied text that gets concatenated into an LLM prompt and that changes the LLM's behaviour. |
+| **RAG** (Retrieval-Augmented Generation) | Feeding documents into an LLM prompt at query time. If user-uploaded documents are not marked as untrusted, they can carry instructions the model follows. |
+| **IaC** (Infrastructure-as-Code) | Deployment configuration stored as files in the repo — Terraform, CDK, `vercel.json`, Dockerfiles, GitHub Actions workflows. |
+| **HMAC** | A way of signing a message so the recipient can verify it has not been tampered with. Used by most webhook providers. |
+| **SECURITY DEFINER** | A Postgres function attribute that makes the function run with its owner's privileges instead of the caller's. Easy to misuse. |
+| **path:line** | The citation format every finding uses, for example `src/lib/auth.ts:42`. Click the link in your editor to jump straight to the relevant line. |
 
 ## License
 
