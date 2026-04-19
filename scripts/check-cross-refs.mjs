@@ -7,11 +7,12 @@
 // Missing directories are skipped gracefully. Exits non-zero on any error.
 
 import { readFile, stat } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import process from "node:process";
 import { glob } from "glob";
 
-const REPO_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const errors = [];
 
@@ -51,8 +52,15 @@ function isExternal(href) {
 async function checkLinksIn(file) {
   const raw = await readFile(file, "utf8");
   const lines = raw.split(/\r?\n/);
+  let inFence = false;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    // Track fenced code blocks so template paths inside them do not generate errors.
+    if (/^\s*```/.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue;
     LINK_RE.lastIndex = 0;
     let m;
     while ((m = LINK_RE.exec(line)) !== null) {
@@ -60,6 +68,8 @@ async function checkLinksIn(file) {
       if (!href) continue;
       if (isExternal(href)) continue;
       if (href.startsWith("#")) continue;
+      // Skip template placeholders like "red-team-<date>/foo.md".
+      if (/[<>]/.test(href)) continue;
       const target = stripAnchor(href);
       if (!target) continue;
       const resolved = path.resolve(path.dirname(file), target);

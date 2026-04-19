@@ -8,12 +8,13 @@
 // Idempotent: running with no persona changes leaves the file byte-identical.
 
 import { readFile, writeFile, stat } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import process from "node:process";
 import { glob } from "glob";
 import matter from "gray-matter";
 
-const REPO_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const README = path.join(REPO_ROOT, "README.md");
 const START_MARKER = "<!-- generated: scripts/generate-persona-index.mjs -->";
 const END_MARKER = "<!-- /generated -->";

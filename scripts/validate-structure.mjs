@@ -8,11 +8,12 @@
 //   - Missing directories are skipped gracefully.
 
 import { readdir, stat } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import process from "node:process";
 import { spawnSync } from "node:child_process";
 
-const REPO_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const errors = [];
 

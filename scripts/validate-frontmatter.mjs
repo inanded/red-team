@@ -12,12 +12,13 @@
 // Exits non-zero with line-numbered errors. Missing directories are skipped gracefully.
 
 import { readFile, stat } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import process from "node:process";
 import { glob } from "glob";
 import matter from "gray-matter";
 
-const REPO_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ALLOWED_TOOLS = new Set([
   "Read",
   "Write",
@@ -27,6 +28,7 @@ const ALLOWED_TOOLS = new Set([
   "Bash",
   "WebFetch",
   "Agent",
+  "AskUserQuestion",
 ]);
 
 const errors = [];
@@ -46,7 +48,11 @@ async function dirExists(dir) {
 
 function isReadmeLike(file) {
   const base = path.basename(file).toLowerCase();
-  return base === "readme.md" || base === "adapter.md";
+  return base === "readme.md" || base === "adapter.md" || base === "examples.md";
+}
+
+function isOverride(file) {
+  return path.basename(file).toLowerCase().endsWith(".overrides.md");
 }
 
 function kebabStem(file) {
@@ -172,7 +178,7 @@ async function validateSkills(nameRegistry) {
   }
 }
 
-async function validateAdapters(nameRegistry) {
+async function validateAdapters(_nameRegistry) {
   const adaptersDir = path.join(REPO_ROOT, "adapters");
   if (!(await dirExists(adaptersDir))) return;
   const files = await glob("adapters/**/*.md", { cwd: REPO_ROOT, nodir: true });
@@ -182,31 +188,26 @@ async function validateAdapters(nameRegistry) {
     const parsed = await readParsed(file);
     if (!parsed) continue;
     const { data, raw } = parsed;
-    let ok = true;
+
+    if (isOverride(file)) {
+      // Override files declare which persona and which adapter they extend.
+      for (const f of ["persona", "adapter"]) {
+        requireField(file, raw, data, f);
+      }
+      const stem = kebabStem(file).replace(/\.overrides$/, "");
+      if (data.persona && data.persona !== stem) {
+        recordError(
+          file,
+          lineOfKey(raw, "persona"),
+          `persona "${data.persona}" does not match filename stem "${stem}"`
+        );
+      }
+      continue;
+    }
+
+    // Any other non-readme adapter markdown still needs name and description.
     for (const f of ["name", "description"]) {
-      if (!requireField(file, raw, data, f)) ok = false;
-    }
-    if (!ok) continue;
-
-    const stem = kebabStem(file).replace(/\.overrides$/, "");
-    if (data.name !== stem) {
-      recordError(
-        file,
-        lineOfKey(raw, "name"),
-        `name "${data.name}" does not match filename stem "${stem}"`
-      );
-    }
-
-    // Adapter overrides can repeat persona names across adapters, so we scope by path.
-    const scopedKey = `${path.relative(REPO_ROOT, file)}::${data.name}`;
-    if (nameRegistry.has(scopedKey)) {
-      recordError(
-        file,
-        lineOfKey(raw, "name"),
-        `duplicate scoped name "${scopedKey}"`
-      );
-    } else {
-      nameRegistry.set(scopedKey, file);
+      requireField(file, raw, data, f);
     }
   }
 }

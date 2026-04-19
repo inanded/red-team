@@ -11,10 +11,11 @@
 //   5. emit a JSON summary suitable for uploading as a CI artifact
 
 import { stat } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import process from "node:process";
 
-const REPO_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const EXPECTED = path.join(REPO_ROOT, "examples", "vulnerable-fixture", "EXPECTED_FINDINGS.md");
 
 try {
