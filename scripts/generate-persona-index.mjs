@@ -37,7 +37,11 @@ async function loadPersonas() {
     const raw = await readFile(path.join(REPO_ROOT, rel), "utf8");
     const parsed = matter(raw);
     const name = parsed.data?.name ?? path.basename(base, ".md");
-    const description = (parsed.data?.description ?? "").replace(/\|/g, "\\|").trim();
+    const description = (parsed.data?.description ?? "")
+      .replace(/\\/g, "\\\\")
+      .replace(/\|/g, "\\|")
+      .replace(/\r?\n/g, " ")
+      .trim();
     rows.push({ name, description, rel });
   }
   rows.sort((a, b) => a.name.localeCompare(b.name));
