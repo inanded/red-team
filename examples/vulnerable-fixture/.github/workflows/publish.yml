@@ -1,0 +1,28 @@
+name: publish
+
+# Intentionally vulnerable: this workflow runs `npm publish` without --provenance,
+# and sources NPM_TOKEN from a long-lived repository secret rather than from an
+# OIDC trusted-publisher federation. A single compromised maintainer or a
+# malicious PR touching this workflow can ship a backdoored version under the
+# project's publishing identity with no attestation chain.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

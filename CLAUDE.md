@@ -29,7 +29,7 @@ npm run test:smoke        # runs pack against examples/vulnerable-fixture/ (slow
 
 ## File layout
 
-- `agents/` — the coordinator + 12 persona prompts
+- `agents/` — the coordinator + 13 persona prompts
 - `skills/` — 7 reusable skills that personas reference
 - `adapters/` — 7 stack-specific overlay packs
 - `examples/vulnerable-fixture/` — intentionally-vulnerable demo app (smoke-test target)

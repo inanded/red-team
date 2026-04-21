@@ -4,7 +4,7 @@ Guidelines for AI agents and humans working in this repository.
 
 ## Repository overview
 
-This repository is the **red-team pack** — a Claude Code plugin that ships twelve reviewer personas, a coordinator, a recon scout, seven shared skills, and seven stack adapters. It also conforms to the [Agent Skills specification](https://agentskills.io/specification.md) for the seven skills, so the skills can be installed by any compliant skills CLI.
+This repository is the **red-team pack** — a Claude Code plugin that ships thirteen reviewer personas, a coordinator, a recon scout, seven shared skills, and seven stack adapters. It also conforms to the [Agent Skills specification](https://agentskills.io/specification.md) for the seven skills, so the skills can be installed by any compliant skills CLI.
 
 - **Name**: red-team
 - **GitHub**: [inanded/red-team](https://github.com/inanded/red-team)

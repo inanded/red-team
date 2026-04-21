@@ -86,6 +86,13 @@ Produce an inventory with file paths for each of the following:
 
 List up to five paths per category. If a category is empty, record "none detected".
 
+### Third-party integration surface
+
+- OAuth clients the app itself configures: grep for `OAuth2` client instantiation (`googleapis` `auth.OAuth2`), `next-auth` `providers: [Google({...})]`, `passport` `.use(new GoogleStrategy({...}))`, `@slack/oauth`, `@octokit/auth-oauth-app`, Microsoft Graph SDK `scopes`. Record the provider and the scope array (or "not detected").
+- External-API SDK clients: grep imports for `stripe`, `resend`, `@octokit/rest`, `googleapis`, `@slack/web-api`, `@sendgrid/mail`, `twilio`, `@aws-sdk/*` (other than the data-layer client), `mixpanel`, `posthog-node`. Record one line per SDK, or "none detected".
+- Publishable packages: look at every `package.json` in the tree. Record each package where `"private"` is absent or false, and whether a release workflow (`.github/workflows/*publish*.yml`, `release.yml`, or a `release` script) is present. Record "private packages only" if every manifest sets `"private": true`.
+- Audit-log plumbing: grep for any `audit_log`, `activity_log`, `logAudit`, `auditEvent` symbol. Record whether the project has such plumbing at all — this shapes whether the third-party-trust-auditor can check emission on privileged routes.
+
 ### Recommended adapter
 
 Read `adapters/` and its `README.md` (if present) to see which adapters are shipped. Match the detected providers against the adapter directory names. Record:
@@ -124,6 +131,12 @@ Date: <YYYY-MM-DD>
 
 ## Data classification signals
 ...
+
+## Third-party integration surface
+OAuth clients: ...
+External-API SDKs: ...
+Publishable packages: ...
+Audit-log plumbing: ...
 
 ## Risk hotspots
 ### Webhook routes

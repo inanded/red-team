@@ -1,6 +1,6 @@
 # Reviewer personas
 
-This directory holds the twelve reviewer persona prompts. The coordinator at `agents/red-team-coordinator.md` selects a subset for each run based on the codebase profile produced by `agents/recon-scout.md`.
+This directory holds the thirteen reviewer persona prompts. The coordinator at `agents/red-team-coordinator.md` selects a subset for each run based on the codebase profile produced by `agents/recon-scout.md`.
 
 Each persona is read-only. Each persona's output obeys the shared contracts in `skills/`:
 
@@ -26,6 +26,7 @@ Each persona is read-only. Each persona's output obeys the shared contracts in `
 | [race-condition-hunter.md](race-condition-hunter.md) | TOCTOU, double-submit, ordering | Recommended when cron jobs, webhook routes, or credit-or-quota counters are present. |
 | [api-versioning-attacker.md](api-versioning-attacker.md) | Seams between API versions | Recommended when more than one API version is detected. |
 | [observability-attacker.md](observability-attacker.md) | Logs, metrics, traces, debug routes | Recommended when a logging or error-tracking integration is detected. |
+| [third-party-trust-auditor.md](third-party-trust-auditor.md) | OAuth scopes, IaC secret classification, npm publish identity, integration audit trails | Recommended when any third-party OAuth integration, publishable package, or external API SDK is detected. |
 
 ## Adapter overlays
 

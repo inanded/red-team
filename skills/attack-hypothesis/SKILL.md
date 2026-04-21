@@ -13,7 +13,7 @@ description: The verifiable-finding contract — every red-team finding must fil
 
 ## Why a contract
 
-Personas run in parallel and never see each other's output. The coordinator has to consolidate twelve streams of markdown into one report without losing information or double-counting. That only works if every finding is shaped the same way, has a stable ID, and cites code the coordinator can verify by reading the same file.
+Personas run in parallel and never see each other's output. The coordinator has to consolidate thirteen streams of markdown into one report without losing information or double-counting. That only works if every finding is shaped the same way, has a stable ID, and cites code the coordinator can verify by reading the same file.
 
 The contract is also a discipline for the persona. If you cannot fill `File evidence` with a real `path:line` and quoted code, you are speculating and the finding should be dropped or demoted to `NEEDS-VERIFY`.
 

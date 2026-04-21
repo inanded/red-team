@@ -1,6 +1,6 @@
 # Red Team — Security Review Pack for Claude Code
 
-**A second pair of eyes on your codebase, run by twelve specialised AI reviewers.**
+**A second pair of eyes on your codebase, run by thirteen specialised AI reviewers.**
 
 Point it at your project and within 10–20 minutes you get a prioritised list of the most likely security issues — each one with the exact file and line, a plain-English walkthrough, and a one-line fix. It runs entirely inside Claude Code, only reads your code (never writes or calls external services), and costs a few dollars of API usage per run.
 
@@ -33,7 +33,7 @@ cd your-project
 npx inanded/red-team
 ```
 
-`npx` is already included with Node.js. It downloads this pack, copies the twelve reviewers and seven shared rulebooks into `your-project/.claude/`, and then gets out of the way. Nothing is installed system-wide. To uninstall later, just delete the `.claude/` folder.
+`npx` is already included with Node.js. It downloads this pack, copies the thirteen reviewers and seven shared rulebooks into `your-project/.claude/`, and then gets out of the way. Nothing is installed system-wide. To uninstall later, just delete the `.claude/` folder.
 
 ### 3. Run your first review
 
@@ -54,7 +54,7 @@ What happens next:
 - Claude Code asks if it is okay to let the coordinator and the personas run. Say yes.
 - The **recon-scout** reads your project and prints a short summary (framework, auth provider, payments, AI usage, infrastructure). This takes about one minute.
 - The coordinator shows you a **three-bucket table** — Recommended, Optional, Skipped — of personas it wants to run. Usually you can just confirm; you can untick or tick whichever you like.
-- Up to twelve personas run in parallel. You will see progress messages. This takes 10–20 minutes on a medium codebase.
+- Up to thirteen personas run in parallel. You will see progress messages. This takes 10–20 minutes on a medium codebase.
 - When finished, Claude Code prints a short summary and writes the full report to `docs/red-team-<today>.md` in your project folder.
 
 ### 4. Read the report
@@ -69,7 +69,7 @@ That is the whole workflow. The rest of this README is reference material — wh
 
 ## What is this pack?
 
-A **reviewer persona** is a Claude Code sub-agent that acts as a particular kind of attacker or auditor. Instead of one generic "security review", the pack runs twelve in parallel — each focused on a single threat model — and consolidates their findings into one ranked backlog.
+A **reviewer persona** is a Claude Code sub-agent that acts as a particular kind of attacker or auditor. Instead of one generic "security review", the pack runs thirteen in parallel — each focused on a single threat model — and consolidates their findings into one ranked backlog.
 
 - **Recon first.** A scout agent profiles your codebase — stack, auth provider, data layer, payments, AI features, infrastructure, tenancy model, regulated-data signals — and writes it to `CODEBASE_PROFILE.md`.
 - **You pick the personas.** The coordinator presents a three-bucket table (recommended / optional / skipped with reason). You confirm or edit, then the personas spawn in parallel.
@@ -102,10 +102,10 @@ A **reviewer persona** is a Claude Code sub-agent that acts as a particular kind
 │   Crypto &   │ │  Compliance  │ │   Cloud      │ │   AI / LLM   │
 │   secrets    │ │   auditor    │ │   infra      │ │   attacker   │
 └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│    Race      │ │     API      │ │ Observability│
-│  conditions  │ │  versioning  │ │   attacker   │
-└──────────────┘ └──────────────┘ └──────────────┘
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│    Race      │ │     API      │ │ Observability│ │ Third-party  │
+│  conditions  │ │  versioning  │ │   attacker   │ │   trust      │
+└──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘
                                              │
                                              ▼
                              ┌──────────────────────────────────┐
@@ -137,6 +137,7 @@ Agents are Claude Code sub-agents. After install, you can invoke any of them by 
 | [race-condition-hunter](agents/red-team/race-condition-hunter.md) | TOCTOU, double-submit, ordering | Recommended when cron jobs, webhook routes, or credit/quota counters are present. Produces timeline diagrams. |
 | [api-versioning-attacker](agents/red-team/api-versioning-attacker.md) | Seams between API versions | Recommended when more than one API version is detected. Deprecated routes, header parsing, compat shims. |
 | [observability-attacker](agents/red-team/observability-attacker.md) | Logs, metrics, traces, debug routes | Recommended when a logging or error-tracking integration is detected. PII in logs, cardinality bombs, health-endpoint leakage. |
+| [third-party-trust-auditor](agents/red-team/third-party-trust-auditor.md) | Third-party integration trust shape | Recommended when any third-party OAuth integration, publishable package, or external-API SDK client is detected. OAuth scope drift, secret-classification discipline, npm publish identity (provenance, OIDC), integration audit-log coverage. |
 
 ## Available skills
 
@@ -176,7 +177,7 @@ All three options are **per-project** — they only add files inside the folder 
 
 ### Option 1 — CLI install (recommended)
 
-One command installs the full pack — coordinator, recon scout, all twelve personas, and all seven skills — into the current project.
+One command installs the full pack — coordinator, recon scout, all thirteen personas, and all seven skills — into the current project.
 
 ```bash
 # Install the full pack
@@ -201,7 +202,7 @@ Adapter slugs: `supabase-stripe-nextjs`, `auth0-postgres`, `clerk-prisma`, `fire
 
 ### Option 2 — Claude Code plugin
 
-Install the full pack — coordinator, recon scout, twelve personas, and seven skills — through Claude Code's native plugin marketplace.
+Install the full pack — coordinator, recon scout, thirteen personas, and seven skills — through Claude Code's native plugin marketplace.
 
 ```
 /plugin marketplace add inanded/red-team
@@ -347,7 +348,7 @@ The pack's shared `attack-hypothesis` skill is already loaded, so Claude Code wi
 - **Is it safe to run on my production codebase?** Yes. Every persona is read-only. No live network probes, no writes to anything except `docs/red-team-<date>/`.
 - **Does it call out to anything?** The `external-attacker` persona has `WebFetch` for public documentation. No other agent makes network calls.
 - **How long does a run take?** Typical: recon 1-2 minutes, full-swarm parallel execution 10-20 minutes.
-- **How much does a run cost?** Roughly a few dollars of Claude API usage for a twelve-persona run on a medium-sized codebase.
+- **How much does a run cost?** Roughly a few dollars of Claude API usage for a thirteen-persona run on a medium-sized codebase.
 - **Can I run a single persona?** Yes. At the picker, untick everything except the one you want.
 - **Are the three install paths mutually exclusive?** Yes — pick one. All three end up with the same files in `./.claude/`. Option 1 (CLI) is the shortest path; Option 2 (plugin) integrates with Claude Code's built-in plugin management; Option 3 (clone) is useful when you want to customise the pack before install.
 - **Do I need an adapter for my stack to be useful?** No. The core personas are stack-agnostic and catch the majority of findings. Adapters add depth for specific providers. If none match your stack, copy `_template/` and add one for your team — the scaffolding is under 200 lines per persona override.

@@ -26,6 +26,9 @@ The smoke test passes when every row is matched by the consolidated report at or
 | api-versioning-attacker | v1/users/me | src/app/api/v1/users/me/route.ts | HIGH |
 | observability-attacker | headers | src/middleware.ts | HIGH |
 | observability-attacker | healthz | src/app/api/healthz/route.ts | MED |
+| third-party-trust-auditor | drive.readonly | src/lib/integrations/google-calendar.ts | HIGH |
+| third-party-trust-auditor | provenance | .github/workflows/publish.yml | HIGH |
+| third-party-trust-auditor | audit log | src/app/api/integrations/[provider]/route.ts | MED |
 
 ## Parser notes
 

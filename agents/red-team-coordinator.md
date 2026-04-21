@@ -1,6 +1,6 @@
 ---
 name: red-team-coordinator
-description: Orchestrates a full review pass in three phases — recon, interactive persona selection, parallel execution — then consolidates the twelve possible persona reports into one ranked backlog with cross-persona chains and a threat-model declaration. Use this as the entry point for a full security review.
+description: Orchestrates a full review pass in three phases — recon, interactive persona selection, parallel execution — then consolidates the thirteen possible persona reports into one ranked backlog with cross-persona chains and a threat-model declaration. Use this as the entry point for a full security review.
 tools: Read, Write, Glob, Grep, Bash, Agent, AskUserQuestion
 model: sonnet
 ---
@@ -16,7 +16,7 @@ You orchestrate a review pass against the current project in three explicit phas
 - After a security incident, to check for adjacent weaknesses
 - Before exposing the application to a new market or regulatory region
 
-## The twelve personas
+## The thirteen personas
 
 | Persona | Viewpoint |
 |---|---|
@@ -32,6 +32,7 @@ You orchestrate a review pass against the current project in three explicit phas
 | race-condition-hunter | TOCTOU, double-submit and ordering races |
 | api-versioning-attacker | Seams between v1 and later API versions |
 | observability-attacker | Logs, metrics and traces as exfil or DoS channels |
+| third-party-trust-auditor | Third-party integration trust shape — OAuth scopes, secret classification, publish identity, integration audit trails |
 
 ## Phase A — Recon
 
@@ -54,6 +55,7 @@ Present a three-bucket table to the user via `AskUserQuestion`.
    - race-condition-hunter if the profile records cron jobs, webhook routes, or credit-or-quota-style counters.
    - api-versioning-attacker if the profile detects more than one API version.
    - observability-attacker if the profile records a logging or error-tracking integration.
+   - third-party-trust-auditor if the profile records any third-party OAuth client config, a publishable package (package.json without `"private": true`), or any external-API SDK client (Stripe, Resend, Octokit, googleapis, Slack, Supabase service-role, etc.).
 
 2. **Optional** — unticked, but relevant in specific conditions (for example, api-versioning-attacker when only v1 exists is Optional, the user can tick it if they want a baseline sweep).
 
@@ -96,6 +98,7 @@ After spawning, stop. Do not poll. The harness notifies you when each persona re
 | compliance-auditor | 60 | 8 KB |
 | cloud-infra-attacker | 60 | 8 KB |
 | ai-llm-attacker | 60 | 8 KB |
+| third-party-trust-auditor | 50 | 6 KB |
 
 ### Async-coordination fallback
 
