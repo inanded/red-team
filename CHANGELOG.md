@@ -5,6 +5,34 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] — 2026-04-24
+
+A further security review of v1.0.3 surfaced 7 findings (rt3-01 through rt3-07); this release addresses 6 with mechanical fixes and documents rt3-05 (Unicode homoglyph bypass) as accepted residual.
+
+### Security (rt3-01) — HIGH
+- **Silent scanner bypass closed.** The `[DO NOT AUTO-IMPLEMENT]` token that v1.0.3's rt2-05 required at the end of every `Fix` collided with the `\bdo not\b` entry in `NEGATION_MARKERS` — every Fix line contained the substring "DO NOT" and was silently skipped by the single-line scanner. Fix: `isAntiInstruction` now strips known report tokens (`[DO NOT AUTO-IMPLEMENT]`, `READ-FIRST`) from each line before evaluating real negation markers. Verified with acceptance tests that the original `public/debug-account.html`-class phrasing with the token appended is now caught.
+
+### Security (rt3-02) — MED
+- **CLI arg validation.** `bin/red-team.mjs` now rejects `--check-safety`, `--check-freshness`, `--adapter`, `--personas`, `--skills` when no value follows. Previously these flags read past the end of argv to `undefined`, the falsy check fell through, and the CLI ran the default installer — which could clobber `.claude/agents/` if a user ran `npx inanded/red-team --check-safety` (intending to scan a report but forgetting the path).
+
+### Security (rt3-03) — MED
+- **Coordinator banner synced with SKILL.** The hard-coded banner template in `agents/red-team-coordinator.md` was stale — missing the rt2-05 per-paragraph `[DO NOT AUTO-IMPLEMENT]` tokens and the rt2-11 `--check-safety` guidance. Per-persona reports inherited the updated banner via the SKILL, but the consolidated `docs/red-team-<date>.md` — the primary user-visible artifact — did not. Now both templates match.
+
+### Security (rt3-04) — MED
+- **Next.js whitelist removed from path scanner.** v1.0.2's rt2-10 whitelist for `route.ts`/`page.tsx`/`layout.tsx` filenames under `app/` and `pages/` was hiding true positives — "Create `app/admin/page.tsx`" is the exact class of incident the pack was built to prevent (a new public-serving route shipped). The whitelist was never needed to let edit-Fixes through because edit verbs (`replace`, `tighten`, `add-check`) aren't in the creation-verb list anyway. Path charset widened to include framework-specific characters (`()`, `[]`, `@`) so route groups (`app/(auth)/...`), dynamic segments (`app/[slug]/...`), and parallel routes (`app/@modal/...`) all trip the scanner.
+
+### Security (rt3-06) — LOW
+- **Banner-unknown handling documented.** A persona in direct-invoke mode without `Bash` cannot read the current SHA. The skill now explicitly says: fill every `{…}` field with the literal string `unknown` and log the reason under `## Pack safety`. `--check-freshness` treats `unknown` as not-yet-verified (exit 2). A banner without a real SHA is not a freshness anchor.
+
+### Security (rt3-07) — LOW
+- **`--check-freshness` is now fail-closed.** When CWD is not a git repository the script now exits 2 (not-yet-verified) instead of 0. CI pipelines checking `$?` no longer treat the non-git case as a pass.
+
+### Accepted residual (rt3-05)
+- **Unicode homoglyph / markdown-emphasis bypass.** A persona writing "Сreate a file" (Cyrillic `С`) or `**Cr****eate** a file` bypasses the regex library. Fixing requires NFC normalisation + confusables detection, which is a substantial change for a low-probability attack (personas are English-prompted LLMs that don't typically emit these characters). Documented as residual; would be addressed if a real bypass is observed in the wild.
+
+### Housekeeping
+- Removed scratch `tmp-probes/` directory left over from a red-team run.
+
 ## [1.0.3] — 2026-04-24
 
 A follow-up security review of v1.0.2 surfaced 11 findings (rt2-01 through rt2-11); this release addresses 10 of them and documents the 11th (rt2-05's Slack paste degradation is mitigated in code, the user-research verification remains open).

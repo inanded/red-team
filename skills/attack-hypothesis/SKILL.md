@@ -34,7 +34,7 @@ Personas self-perform the following safety passes before writing their report an
 
 ## Mandatory report header
 
-Every persona report MUST begin with the following banner, verbatim, before any other content. The persona fills in the `{…}` fields from the `## Repository state` block in `CODEBASE_PROFILE.md` (or reads `git rev-parse HEAD`, `git rev-parse --abbrev-ref HEAD`, and the capture date directly if no profile is available). The coordinator re-verifies this on ingestion and `scripts/validate-safe-remediation.mjs` fails CI if a persona prompt or worked example omits the banner skeleton.
+Every persona report MUST begin with the following banner, verbatim, before any other content. The persona fills in the `{…}` fields from the `## Repository state` block in `CODEBASE_PROFILE.md` when the coordinator spawned it. If no profile is available (direct `@<persona>` invocation) and the persona does not have the `Bash` tool to run `git rev-parse`, fill every `{…}` field with the literal string `unknown` and note the reason under `## Pack safety` (e.g. "banner fields set to `unknown` — no CODEBASE_PROFILE.md available and persona lacks Bash; run via coordinator for stamped banner"). `npx inanded/red-team --check-freshness` treats a SHA of `unknown` as not-yet-verified and exits non-zero — a banner without a real SHA is not a freshness anchor. The coordinator re-verifies this on ingestion and `scripts/validate-safe-remediation.mjs` fails CI if a persona prompt or worked example omits the banner skeleton.
 
 ```markdown
 > **[DO NOT AUTO-IMPLEMENT] ⚠ READ-FIRST — DO NOT AUTO-IMPLEMENT**

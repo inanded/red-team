@@ -87,8 +87,19 @@ function parseArgs(argv) {
     checkFreshness: null, checkSafety: null,
     list: false, help: false,
   };
+  // Every flag below requires a following argument. Without this check,
+  // `npx ... --check-safety` with no path silently fell through to a full
+  // install (rt3-02) and could clobber .claude/agents/.
+  const flagsRequiringValue = new Set([
+    "--check-freshness", "--check-safety", "--adapter", "--personas", "--skills",
+  ]);
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
+    if (flagsRequiringValue.has(a) && (i + 1 >= argv.length || argv[i + 1].startsWith("--"))) {
+      console.error(`argument ${a} requires a value`);
+      console.error("run `npx inanded/red-team --help` for usage");
+      process.exit(1);
+    }
     if (a === "--help" || a === "-h") out.help = true;
     else if (a === "--list") out.list = true;
     else if (a === "--only-agents") out.onlyAgents = true;

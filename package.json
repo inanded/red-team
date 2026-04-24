@@ -1,6 +1,6 @@
 {
   "name": "@inanded/red-team",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": false,
   "license": "MIT",
   "description": "Claude Code security-review pack: thirteen reviewer personas, coordinator, recon scout, seven skills, and seven stack adapters.",

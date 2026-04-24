@@ -71,7 +71,7 @@ async function main() {
   }
 
   const bannerLine = text.match(
-    /Valid against commit `([a-f0-9]{7,40})` on branch `([^`]+)`, captured `([^`]+)` \(tree: `([^`]+)`\)/
+    /Valid against commit `([a-f0-9]{7,40}|unknown)` on branch `([^`]+)`, captured `([^`]+)` \(tree: `([^`]+)`\)/
   );
 
   if (!bannerLine) {
@@ -83,13 +83,27 @@ async function main() {
 
   const [, reportSha, reportBranch, reportDate, reportDirty] = bannerLine;
 
+  // rt3-06: a persona in direct-invoke mode may have been unable to read the
+  // current SHA (no CODEBASE_PROFILE.md and no Bash tool) and filled the
+  // banner with the literal "unknown". Treat that as not-yet-verified — the
+  // banner's tamper-evidence story does not apply when the SHA is unknown.
+  if (reportSha === "unknown") {
+    console.error("report banner records commit SHA as `unknown` — freshness cannot be verified.");
+    console.error("the persona was likely invoked directly without a recon-scout profile.");
+    console.error("re-run via the coordinator (which produces CODEBASE_PROFILE.md) to get a stamped banner.");
+    process.exit(2);
+  }
+
   const head = currentHead();
   if (!head.isGit) {
-    console.log(
+    // rt3-07: exit fail-closed (2) so CI pipelines checking $? don't treat the
+    // non-git case as a pass. The previous exit 0 was fail-open.
+    console.error(
       `report captured at commit ${reportSha} on ${reportBranch} (${reportDate}).`
     );
-    console.log("current directory is not a git repo — cannot compare. Proceed with caution.");
-    process.exit(0);
+    console.error("current directory is not a git repo — cannot verify freshness.");
+    console.error("treat as not-yet-verified; do not rely on path:line references without a manual check.");
+    process.exit(2);
   }
 
   // Tamper-evidence: does git remember a commit with this SHA, and does its

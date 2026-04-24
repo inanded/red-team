@@ -37,13 +37,15 @@ export const PATTERNS = [
     multiline: true,
   },
   {
-    // Path-based trigger for public-serving directories. Next.js App Router
-    // and Pages Router legitimately live under pages/ and app/ — we exclude
-    // route.ts/route.js/page.tsx/layout.tsx filenames (rt2-10) since those
-    // name existing server-rendered routes the persona may be editing.
-    // Any other filename under these directories with a create/add verb is
-    // a red flag (the original incident was public/debug-account.html).
-    re: /\b(create|add|drop|write|scaffold|generate|build|make|place|put|deploy|publish|touch)\b[^\n]{0,80}\b(public|static|pages|app|dist|www|wwwroot|htdocs)\/(?!.*(?:route\.(?:ts|js|mjs|cjs)|page\.(?:tsx|jsx|ts|js)|layout\.(?:tsx|jsx|ts|js)|loading\.(?:tsx|jsx|ts|js)|error\.(?:tsx|jsx|ts|js)|not-found\.(?:tsx|jsx|ts|js))\b)[A-Za-z0-9._-]+/i,
+    // Path-based trigger for public-serving directories. ANY create/add verb
+    // paired with a path under public/ static/ pages/ app/ dist/ www/ is a
+    // red flag, including Next.js route/page/layout files. rt3-04: the old
+    // rt2-10 whitelist for route.ts/page.tsx filenames was hiding true
+    // positives — "Create app/admin/page.tsx" is the exact debug-account.html
+    // class of incident (a new public-serving route shipped). Edit fixes
+    // use edit verbs (replace / tighten / add-check) that don't appear in
+    // this verb list, so the whitelist was never needed to let them through.
+    re: /\b(create|add|drop|write|scaffold|generate|build|make|place|put|deploy|publish|touch)\b[^\n]{0,80}\b(public|static|pages|app|dist|www|wwwroot|htdocs)\/[A-Za-z0-9._()\[\]@/-]+/i,
     why: "targets a public-serving directory with a create/add verb — any such file could be shipped to production",
   },
   {
@@ -116,13 +118,26 @@ export const NEGATION_MARKERS = [
   /\bbad fix\b/i,
   /\bpack defect\b/i,
   /\bunsafe\b/i,
-  /\bREAD-FIRST\b/i,
-  /\bDO NOT AUTO-IMPLEMENT\b/i,
   /\bdisallowed\b/i,
 ];
 
+// Known report tokens that look like negation markers but aren't — the
+// rt2-05 per-Fix advisory mandates `[DO NOT AUTO-IMPLEMENT]` on every Fix,
+// which contains the substring "DO NOT". Without stripping this first, the
+// `\bdo not\b` marker above would match every Fix line and disable the
+// single-line scanner on exactly the lines it must scan. rt3-01 was the
+// silent bypass this strip-pass closes.
+const REPORT_TOKENS_TO_STRIP = [
+  /\[DO NOT AUTO-IMPLEMENT\]/gi,
+  /\bREAD-FIRST\b/gi,
+];
+
 export function isAntiInstruction(line) {
-  return NEGATION_MARKERS.some((re) => re.test(line));
+  let stripped = line;
+  for (const re of REPORT_TOKENS_TO_STRIP) {
+    stripped = stripped.replace(re, "");
+  }
+  return NEGATION_MARKERS.some((re) => re.test(stripped));
 }
 
 // Scan arbitrary text (a persona's report, a committed markdown file,
