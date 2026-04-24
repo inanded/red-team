@@ -64,12 +64,22 @@ const PATTERNS = [
     // "create route" or "generate endpoint" describing the target app's existing
     // structure don't trip the pattern. The incident phrasing was
     // "create a test file ..." which has "a".
-    re: /\b(create|add|scaffold|drop\s+in|write)\s+(a|an|another|new|the)\s+(new\s+)?(file|page|route|endpoint|script|HTML\s+document|test\s+page|test\s+file|debug\s+page|debug\s+file|debug\s+endpoint|helper\s+script|demo\s+page|sample\s+page|poc|proof.of.concept)\b/i,
+    re: /\b(create|add|scaffold|drop\s+in|write|spin\s+up|stand\s+up|instantiate|provision|materialize|bootstrap|generate)\s+(a|an|another|new|the)\s+(new\s+)?(file|page|route|endpoint|script|HTML\s+document|test\s+page|test\s+file|debug\s+page|debug\s+file|debug\s+endpoint|helper\s+script|helper\s+class|demo\s+page|sample\s+page|poc|proof.of.concept)\b/i,
     why: "instructs the reader to create a new artifact — a downstream coding AI will implement this literally",
   },
   {
-    re: /\b(to\s+verify|to\s+test|to\s+prove|to\s+demonstrate|to\s+confirm)\b[^.\n]{0,80}\b(create|add|scaffold|run|execute|call|fetch|curl|wget)\b/i,
+    re: /\b(to\s+verify|to\s+test|to\s+prove|to\s+demonstrate|to\s+confirm)\b[^.\n]{0,80}\b(create|add|scaffold|run|execute|call|fetch|curl|wget|spin\s+up|stand\s+up|instantiate|provision|materialize|bootstrap|generate)\b/i,
     why: "'to verify, create/run ...' construction — verification must be read-only",
+  },
+  {
+    // Multi-line variant: a verify verb on one line, a creation verb on a later line
+    // (same paragraph). The `s` flag lets `[\s\S]` span newlines. Kept to 200 chars
+    // between the two verbs so cross-paragraph false positives are unlikely.
+    // Marked multiline:true so the scanner tests this against the whole file text,
+    // not line-by-line.
+    re: /\b(to\s+verify|to\s+test|to\s+prove|to\s+demonstrate|to\s+confirm)\b[\s\S]{0,200}?\b(create|add|scaffold|spin\s+up|stand\s+up|instantiate|provision|materialize|bootstrap|generate)\s+(a|an|another|new|the)\b/is,
+    multiline: true,
+    why: "'to verify ... create/scaffold ...' construction spanning multiple lines — verification must be read-only",
   },
   {
     re: /\b(create|add|drop|write|scaffold|generate)\b[^\n]{0,80}\b(public|static|pages|app|dist|www|wwwroot|htdocs)\/[A-Za-z0-9._-]+/i,
@@ -90,13 +100,14 @@ const PATTERNS = [
   // are not. The allowed noun list below intentionally excludes "line",
   // "literal", "argument", "import", "call", "value", "clause", "block", "mode",
   // "flag", "parameter" — all of which pair legitimately with remove/delete.
-  // `[^\n.]{0,40}?` allows qualifier words like "legacy admin" or "/api/debug".
+  // `[^\n.]{0,120}?` allows multi-word qualifier phrases like
+  // "entire legacy admin webhook handler" between determiner and noun.
   {
-    re: /\b(delete|remove|rip\s+out|tear\s+out)\s+(the|this|that|an|a)\s+[^\n.]{0,40}?\b(file|module|directory|folder|package|route|endpoint|middleware|handler|controller|service|component)\b/i,
+    re: /\b(delete|remove|rip\s+out|tear\s+out)\s+(the|this|that|an|a)\s+[^\n.]{0,120}?\b(file|module|directory|folder|package|route|endpoint|middleware|handler|controller|service|component)\b/i,
     why: "scope-unsafe destructive remediation — caller enumeration required; use line-level or literal-level scope instead",
   },
   {
-    re: /\bdrop\s+(the|this|that|an|a)\s+[^\n.]{0,40}?\b(table|column|schema|database|collection)\b/i,
+    re: /\bdrop\s+(the|this|that|an|a)\s+[^\n.]{0,120}?\b(table|column|schema|database|collection)\b/i,
     why: "schema-level destructive remediation without a migration plan — must use a migration file, not a raw drop",
   },
   {
@@ -110,17 +121,18 @@ const PATTERNS = [
   },
 
   // ------ Rotation class ------
-  // Rotation mentions must be accompanied by ordering guidance. Only flagged
-  // when "Rotate" starts a sentence or bullet (an imperative aimed at the
-  // reader), not when it's inside a noun-phrase list of what the target app's
-  // routes do (e.g. "the privileged actions include rotate / revoke / ...").
-  // Requires "the"/"your" (specific referent) — excludes "an"/"a"
-  // (enumerative). Allows arbitrary qualifier text between determiner and
-  // the final noun. Negation markers are strict ordering/verification
-  // indicators — "dashboard" alone is not one. This lints committed text;
-  // runtime prose is handled by the coordinator's scrub.
+  // Rotation mentions must be accompanied by ordering guidance. Flagged
+  // wherever "Rotate" appears as an imperative aimed at the reader, not only
+  // at the start of a line — "After review, rotate the Stripe key" should be
+  // caught just like "Rotate the Stripe key". Requires "the"/"your"
+  // (specific referent) — excludes "an"/"a" (enumerative), which keeps the
+  // "privileged actions include rotate an API key" noun-phrase-list case out.
+  // The negation-marker lookahead (before/after/first/then/environment/...)
+  // is the false-positive filter when a full ordering clause is present
+  // on the same line. This lints committed text; runtime prose is handled
+  // by the coordinator's scrub.
   {
-    re: /^(\s*[-*>]\s*|\s*\d+\.\s*)?Rotate\s+(the|your)\b[^\n.]*?\b(key|secret|token|credential|password|api\s+key|service\s+account|service\s+role|access\s+key|signing\s+secret)\b(?![^\n]*\b(before|after|first|then|environment|env|production|staging|preview|grace\s+window|verify|confirm\s+that|coordinate\s+(a\s+)?maintenance)\b)/im,
+    re: /\bRotate\s+(the|your)\b[^\n.]*?\b(key|secret|token|credential|password|api\s+key|service\s+account|service\s+role|access\s+key|signing\s+secret)\b(?![^\n]*\b(before|after|first|then|environment|env|production|staging|preview|grace\s+window|verify|confirm\s+that|coordinate\s+(a\s+)?maintenance)\b)/i,
     why: "rotation instruction missing ordering guidance — name environments, grace window, and verification step",
   },
 ];
@@ -169,12 +181,35 @@ async function scanFile(relPath) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (isAntiInstruction(line)) continue;
-    for (const { re, why } of PATTERNS) {
+    for (const { re, why, multiline } of PATTERNS) {
+      if (multiline) continue; // handled in the whole-text pass below
       if (re.test(line)) {
         errors.push(
           `${relPath}:${i + 1}: unsafe-remediation pattern — ${why}\n  > ${line.trim()}`
         );
       }
+    }
+  }
+
+  // Whole-text pass for multi-line patterns. Use a globally-flagged clone so we
+  // can walk every match and compute the starting line number. Skip a match if
+  // any line it spans contains a negation marker (the anti-instruction guard).
+  for (const { re, why, multiline } of PATTERNS) {
+    if (!multiline) continue;
+    const globalRe = new RegExp(re.source, re.flags.includes("g") ? re.flags : re.flags + "g");
+    let m;
+    while ((m = globalRe.exec(text)) !== null) {
+      const start = m.index;
+      const end = m.index + m[0].length;
+      const before = text.slice(0, start);
+      const startLine = before.split(/\r?\n/).length;
+      const spannedLines = text.slice(0, end).split(/\r?\n/).slice(startLine - 1);
+      if (spannedLines.some((l) => isAntiInstruction(l))) continue;
+      const preview = m[0].replace(/\s+/g, " ").trim().slice(0, 160);
+      errors.push(
+        `${relPath}:${startLine}: unsafe-remediation pattern — ${why}\n  > ${preview}`
+      );
+      if (m[0].length === 0) globalRe.lastIndex++; // safety: never infinite-loop
     }
   }
 }

@@ -108,14 +108,17 @@ At the start of Phase C, probe whether the harness supports background callbacks
 
 When every persona report is in, produce `docs/red-team-<date>.md` as the top-level ranked report with the layout below.
 
+The scrub, the banner, and the secret sweep are **already performed by each persona on its own output** per `skills/attack-hypothesis/SKILL.md` → *Report structure (required sections)*. The coordinator's job is to **verify** that every persona did its self-scrub and to re-run the checks as a second pass; the coordinator does not rely on personas being the only enforcement.
+
 1. Read every persona report.
-2. **Scrub unsafe remediation text across every field of every finding** — not only `Fix`, but `Walkthrough`, `Impact`, `Hypothesis`, and any code fence. Apply the *Downstream-AI safety* section of `skills/attack-hypothesis/SKILL.md` globally. Any text that instructs the reader to create a new file, endpoint, page, script, or PoC/debug artifact is a pack defect — rewrite it in place to a read-only remediation against existing code (or mark the finding `NEEDS-VERIFY` if no safe remediation exists) and log the rewrite under a `## Pack safety` section in the consolidated report. See the scrub checklist below.
-3. **Prepend the mandatory header banner** to both the consolidated report and every per-persona report. The banner tells any reader — human or AI — that the document is analysis, not an execution script. Exact text below.
-4. Apply `skills/exploit-chain-mapping/SKILL.md` to identify cross-persona chains.
-5. Apply `skills/severity-scoring/SKILL.md` for the chain-rule adjustment.
-6. Apply `skills/confirmed-safe-tracking/SKILL.md` when you copy each persona's safe-surface notes into the consolidated section.
-7. De-duplicate findings that multiple personas surfaced from different angles. Use the finding ID and the cited `path:line` as the primary keys; collapse duplicates with a cross-reference.
-8. Order the ranked table by `severity × reachability ÷ effort`. Prerequisite findings sit above the findings they unlock.
+2. **Verify each persona's own safety passes.** Every persona report must contain a `## Pack safety` section listing the self-scrubs it performed (or `No scrubs performed on this report.`). If this section is missing, treat the persona as non-compliant — demote all its EXPLOITABLE findings to `NEEDS-VERIFY`, flag the persona under the consolidated `## Pack safety` section as "did not self-scrub", and apply the full scrub/sweep in step 3.
+3. **Re-run the scrub and the secret-leakage sweep** as a second-pass safety net across every field of every finding, plus any code fence and prose. Apply the *Downstream-AI safety*, *Destructive remediations*, *Secret rotation ordering*, and *Secret redaction in evidence* sections of `skills/attack-hypothesis/SKILL.md` globally. Any residual violation is a persona defect — rewrite in place (or demote to `NEEDS-VERIFY`) and log under the consolidated `## Pack safety` section. See the scrub checklist below.
+4. **Verify the mandatory header banner** on every per-persona report. Prepend it to the consolidated report. The banner tells any reader — human or AI — that the document is analysis, not an execution script. Exact text below.
+5. Apply `skills/exploit-chain-mapping/SKILL.md` to identify cross-persona chains.
+6. Apply `skills/severity-scoring/SKILL.md` for the chain-rule adjustment.
+7. Apply `skills/confirmed-safe-tracking/SKILL.md` when you copy each persona's safe-surface notes into the consolidated section.
+8. De-duplicate findings that multiple personas surfaced from different angles. Use the finding ID and the cited `path:line` as the primary keys; collapse duplicates with a cross-reference.
+9. Order the ranked table by `severity × reachability ÷ effort`. Prerequisite findings sit above the findings they unlock.
 
 ### Scrub checklist (all fields)
 
@@ -182,6 +185,20 @@ eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{4,}  # JWT
 -----BEGIN (RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----
 postgres://[^:]+:[^@]+@                # database URL with embedded password
 mongodb(\+srv)?://[^:]+:[^@]+@
+sk-ant-[A-Za-z0-9_-]{16,}             # Anthropic API key
+sk-[A-Za-z0-9]{20,}                   # OpenAI API key (hyphen, not underscore — do NOT confuse with Stripe's sk_live_/sk_test_)
+sk-proj-[A-Za-z0-9_-]{16,}            # OpenAI project-scoped key
+SK[0-9a-fA-F]{32}                     # Twilio API key SID
+AC[0-9a-fA-F]{32}                     # Twilio Account SID / auth-token-bearing identifier
+key-[0-9a-f]{32}                      # Mailgun API key
+# Postmark uses UUID-shape tokens (8-4-4-4-12 hex) — pattern is too broad to include
+# as a raw regex; redact based on context when the surrounding key name implies Postmark.
+https://discord(?:app)?\.com/api/webhooks/[0-9]+/[A-Za-z0-9_-]+  # Discord webhook URL
+figd_[A-Za-z0-9_-]{16,}               # Figma personal access token
+lin_api_[A-Za-z0-9]{16,}              # Linear API key
+# Vercel tokens are 24-char alphanumeric with no distinguishing prefix — context-dependent;
+# match [A-Za-z0-9]{24} only when assigned to VERCEL_TOKEN= / VERCEL_API_TOKEN= / similar.
+(?:secret|token|key|password|apikey|api_key)\s*[:=]\s*["'][A-Za-z0-9_\-+/=]{32,}["']  # generic high-entropy assignment catch-all
 ```
 
 Redact by keeping the provider-identifying prefix (first 8 characters) and replacing the rest with `<REDACTED>`. JWT: keep `eyJ…<REDACTED>`. PEM: keep BEGIN/END lines, `<REDACTED PRIVATE KEY BODY>` the body. DB URLs: replace the userinfo section with `<REDACTED>@`.

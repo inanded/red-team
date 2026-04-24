@@ -17,9 +17,24 @@ Personas run in parallel and never see each other's output. The coordinator has 
 
 The contract is also a discipline for the persona. If you cannot fill `File evidence` with a real `path:line` and quoted code, you are speculating and the finding should be dropped or demoted to `NEEDS-VERIFY`.
 
+## Report structure (required sections)
+
+Every persona report — whether produced via the coordinator or via direct `@<persona-name>` invocation — MUST have the following top-level structure. The persona is responsible for producing **all** of it on its own; the coordinator *verifies* rather than performs. This prevents the bypass where a user invokes a persona directly and skips coordinator-side defences.
+
+1. **Mandatory report header** (banner — exact text in the next section).
+2. **Findings** — each follows the 10-field contract; empty list is allowed but explicit (`No findings filed.`).
+3. **Confirmed-safe** — surfaces the persona actively checked and found intact. Never empty if findings is empty — the proof-of-work lives here.
+4. **`## Pack safety`** — required section logging every self-scrub, redaction, or rewrite the persona performed on its own output before returning. If the persona made no modifications, write `No scrubs performed on this report.` This section is how the coordinator (or a human reviewer) verifies the persona ran its own safety passes.
+
+Personas self-perform the following safety passes before writing their report and log the results under `## Pack safety`:
+
+- Scrub every field (`Fix`, `Walkthrough`, `Impact`, `Hypothesis`, code fences) against the *Downstream-AI safety*, *Destructive remediations*, and *Secret rotation ordering* sections below. Rewrite violations in place.
+- Sweep every `File evidence` quote against the secret-prefix list in the *Secret redaction in evidence* section. Redact in place.
+- Verify the report begins with the mandatory banner (next section).
+
 ## Mandatory report header
 
-Every persona report MUST begin with the following banner, verbatim, before any other content. The coordinator fills in the `{…}` fields from the `## Repository state` block in `CODEBASE_PROFILE.md` before writing the report. The coordinator verifies this on ingestion and `scripts/validate-safe-remediation.mjs` fails CI if a persona prompt or worked example omits the banner skeleton.
+Every persona report MUST begin with the following banner, verbatim, before any other content. The persona fills in the `{…}` fields from the `## Repository state` block in `CODEBASE_PROFILE.md` (or reads `git rev-parse HEAD`, `git rev-parse --abbrev-ref HEAD`, and the capture date directly if no profile is available). The coordinator re-verifies this on ingestion and `scripts/validate-safe-remediation.mjs` fails CI if a persona prompt or worked example omits the banner skeleton.
 
 ```markdown
 > **⚠ READ-FIRST — DO NOT AUTO-IMPLEMENT**
@@ -49,7 +64,7 @@ Every finding must include all ten of the following, in this order.
 | **Verdict** | Exactly one of: `EXPLOITABLE`, `BLOCKED`, `NEEDS-VERIFY`, `DEFENSE-IN-DEPTH-GAP`. No other values. |
 | **Walkthrough** | Numbered steps an attacker would take, each grounded in the evidence. Stops at "attacker now holds X". No hypothetical tools that don't exist in the stack. |
 | **Impact** | What the attacker gains in business terms. Data classes exposed, money moved, tenants crossed, accounts taken over. |
-| **Fix** | Concrete diff-level change to **code that already exists**. Name the file, name the function, name the check. Not "add authorization" — "add `assertRole('admin')` before line 42 of `src/app/api/users/[id]/route.ts`". The Fix must be safe to apply verbatim. See *Downstream-AI safety* below. |
+| **Fix** | Concrete diff-level change to **code that already exists**. Name the file, name the function, name the check. Not "add authorization" — "add `assertRole('admin')` before line 42 of `src/app/api/users/[id]/route.ts`". The Fix must be safe to apply verbatim. End every `Fix` with the advisory sentence: `Review the diff before committing; verify in a non-production environment before release.` This per-finding advisory survives table extraction and copy-paste even when the top-of-report banner is stripped. See *Downstream-AI safety* below. |
 | **Effort** | `S`, `M`, or `L` per `skills/effort-estimation/SKILL.md`. |
 
 ## Optional fields (by persona)

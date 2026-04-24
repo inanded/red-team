@@ -43,6 +43,24 @@ function currentHead() {
   }
 }
 
+// Tamper-evidence: given a SHA from the report banner, return the commit date
+// that git remembers for that SHA. If the SHA doesn't exist (fabricated banner)
+// or the date in the banner disagrees with git's record (hand-edited banner),
+// the caller can flag tampering. Not cryptographic — an attacker with commit
+// access can still forge — but catches accidental or casual tampering.
+function gitCommitDate(sha) {
+  try {
+    const date = execSync(`git log -1 --format=%cI ${sha}`, {
+      stdio: ["ignore", "pipe", "ignore"],
+    })
+      .toString()
+      .trim();
+    return date || null;
+  } catch {
+    return null;
+  }
+}
+
 async function main() {
   let text;
   try {
@@ -74,11 +92,31 @@ async function main() {
     process.exit(0);
   }
 
+  // Tamper-evidence: does git remember a commit with this SHA, and does its
+  // recorded commit date match the banner's capture date (to the day)?
+  const gitDate = gitCommitDate(reportSha);
+  if (!gitDate) {
+    console.log("report banner references a commit SHA that does not exist in this repo:");
+    console.log(`  report captured at : ${reportSha} on ${reportBranch} (${reportDate})`);
+    console.log("the SHA may be from a different repo, a deleted branch, or a forged banner.");
+    console.log("treat as STALE and re-run the pack.");
+    process.exit(1);
+  }
+  if (reportDate !== "unknown" && !gitDate.startsWith(reportDate)) {
+    console.log("report banner date disagrees with git's record for the captured SHA:");
+    console.log(`  banner says captured : ${reportDate}`);
+    console.log(`  git log -1 %cI ${reportSha.slice(0, 12)} : ${gitDate}`);
+    console.log("the banner has likely been hand-edited or the report is from a different tree.");
+    console.log("treat as STALE and re-run the pack.");
+    process.exit(1);
+  }
+
   const shaMatches = head.sha.startsWith(reportSha) || reportSha.startsWith(head.sha);
   const branchMatches = head.branch === reportBranch;
 
   if (shaMatches && branchMatches && !head.dirty) {
     console.log(`report matches HEAD (${head.sha.slice(0, 12)} on ${head.branch}).`);
+    console.log(`banner date ${reportDate} matches git's record for this commit.`);
     console.log("safe to review — path:line references are current.");
     process.exit(0);
   }

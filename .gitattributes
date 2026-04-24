@@ -1,0 +1,6 @@
+# Generated red-team reports are gitignored locally, but this export-ignore
+# ensures they are never included in a `git archive` / tarball release if one
+# ever slips into the index accidentally. See SECURITY.md for the full policy.
+docs/red-team-*/ export-ignore
+docs/red-team-*.md export-ignore
+examples/ export-ignore

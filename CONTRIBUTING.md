@@ -102,6 +102,12 @@ CI runs all of these on every PR; the smoke test also runs nightly on `main`.
 - **Verdicts are finite.** Use only `EXPLOITABLE`, `BLOCKED`, `NEEDS-VERIFY`, `DEFENSE-IN-DEPTH-GAP` — no "maybe" or "possibly".
 - **No speculation.** If you can't cite `path:line`, it isn't a finding.
 
+## Example secrets in pack text — use obvious placeholders only
+
+When you add a worked example, a redaction rule, or any illustrative code that shows what a real secret **would** look like, always use an obvious placeholder like `REPLACE_WITH_YOUR_STRIPE_KEY` or `<PROVIDER>_KEY_GOES_HERE`. Do NOT use patterns that match a real provider's format (e.g., `sk_live_` + 40 base62 chars). GitHub's secret-scanning push protection will block the commit, and the pattern is meaningless noise anyway — the lesson is the shape, which a placeholder conveys perfectly.
+
+Two pushes during the v1.0.1 hardening pass were blocked by GitHub secret scanning detecting Stripe-shaped placeholder strings in the redaction worked-example; the placeholder was changed to `REPLACE_WITH_REAL_STRIPE_SECRET_KEY` and the push succeeded.
+
 ## Reporting bugs in the pack
 
 See [SECURITY.md](./SECURITY.md) for anything security-relevant. For normal bugs, use the `bug-report` issue template.

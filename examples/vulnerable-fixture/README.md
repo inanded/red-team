@@ -1,3 +1,13 @@
+# ⚠ DO NOT DEPLOY THIS CODE
+
+This directory contains a web application with twenty **intentionally-planted security vulnerabilities**. It exists as a smoke-test target for the red-team pack — the pack's CI asserts that each persona finds its planted defects here. Deploying this code to a real server will expose every one of those vulnerabilities to the internet.
+
+If you cloned the pack as a git submodule, or `cp -r`'d the pack into your project, **delete this `examples/` directory from your deployment tree before shipping**. Add `examples/` to your `.vercelignore`, `.netlifyignore`, or the equivalent for your platform.
+
+This warning exists in `package.json` (`"private": true`), `.vercelignore`, `.netlifyignore`, and `Dockerfile` guard rails — if any of those are missing in a deployed copy, the warning was bypassed deliberately or accidentally.
+
+---
+
 # Vulnerable fixture
 
 **Intentionally vulnerable. Do not deploy.**

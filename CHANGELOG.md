@@ -5,6 +5,50 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] — 2026-04-24
+
+A security review of v1.0.1 surfaced 14 residual risks (rt-01 through rt-14). This release addresses all 14.
+
+### Security (rt-01)
+- **Scrub responsibility moved into the persona contract.** Every persona self-performs banner-prepending, all-field scrubbing, and secret-leakage sweeping before returning its report, and logs the results in a required `## Pack safety` section. The coordinator now *verifies* rather than *performs*. Closes the bypass where direct `@<persona>` invocation skipped all coordinator-side defences. Contract lives in `skills/attack-hypothesis/SKILL.md` → *Report structure (required sections)*.
+
+### Security (rt-02)
+- **Tamper-evident freshness stamp.** `scripts/check-report-freshness.mjs` now re-queries `git log -1 --format=%cI <sha>` for every banner-captured SHA. A banner that names a non-existent SHA, or a banner whose capture-date disagrees with git's record for that SHA, is reported as tampered. Not cryptographic — catches accidental edits and casual forgery.
+
+### Security (rt-03)
+- **Coordinator secret-leakage sweep pattern list expanded.** Added Anthropic (`sk-ant-`), OpenAI (`sk-` + `sk-proj-`), Twilio (`SK`/`AC` + 32 hex), Mailgun (`key-`), Discord webhook URLs, Figma (`figd_`), Linear (`lin_api_`), plus a generic high-entropy `(secret|token|key|password|apikey) = "..."` assignment catch-all.
+
+### Security (rt-04)
+- **Validator verb-list expanded** with `spin up`, `stand up`, `instantiate`, `provision`, `materialize`, `bootstrap`, `generate`. New multi-line "verify … create" pattern (`s` flag, `[\s\S]{0,200}?`) catches cross-line constructions that the single-line pattern missed. Negation-marker awareness extended to multi-line matches.
+
+### Security (rt-05)
+- **Per-finding advisory sentence embedded in every `Fix`.** The contract now requires every Fix to end with "Review the diff before committing; verify in a non-production environment before release." This survives copy-paste when the top-of-report banner is stripped (Slack, Linear, email, PDF export).
+
+### Security (rt-06)
+- **`Bash` removed from every persona** (13 personas). Personas now have only `Read`, `Grep`, `Glob`. `Bash` is retained on `red-team-coordinator` (for `mkdir` and orchestration) and `recon-scout` (for `git rev-parse`). Closes the residual risk that a prompt-injected or confused persona could issue destructive shell commands.
+
+### Security (rt-07)
+- **`## Pack safety` is a required report section**, not optional. If a persona omits it, the coordinator treats the persona as non-compliant, demotes its EXPLOITABLE findings to `NEEDS-VERIFY`, and runs the full scrub/sweep as a second pass. See `skills/attack-hypothesis/SKILL.md` → *Report structure (required sections)*.
+
+### Security (rt-08)
+- **Destructive-verb pattern length cap raised** from `{0,40}?` to `{0,120}?` so long phrases like "Remove the entire legacy admin webhook handler module" are caught.
+
+### Security (rt-10)
+- **Rotation pattern no longer requires line-initial `Rotate`.** A rotation instruction mid-sentence ("After review, rotate the Stripe key") is now caught, gated by the same negation-marker lookahead that filters false positives.
+
+### Security (rt-11)
+- **CONTRIBUTING.md note** about using obvious-placeholder text in any example that would otherwise contain a real-looking secret pattern, to avoid GitHub secret-scanning push protection false-positives.
+
+### Security (rt-12)
+- **Vulnerable fixture marked non-deployable.** `examples/vulnerable-fixture/README.md` now has a loud top-of-file warning. `examples/vulnerable-fixture/.vercelignore`, `.netlifyignore`, and a Dockerfile comment explicitly mark the fixture as not-for-deployment. `"private": true` was already in its `package.json`.
+
+### Security (rt-14)
+- **`.gitattributes` export-ignore** for `docs/red-team-*/`, `docs/red-team-*.md`, and `examples/`. Generated reports and the vulnerable fixture are kept out of `git archive` release tarballs even if a user force-adds them to the index.
+
+### Known residual risk
+- **rt-09** (prompt injection from target code): sandboxing target content as tool output is not implementable in Claude Code today. Documented as accepted residual risk; heuristic detection (all-BLOCKED / meta-instruction phrasing) stays in the coordinator as mitigation.
+- **rt-13** (non-English bypass): theoretical. Personas are English-prompted; LLMs default to English output. Accepted as residual.
+
 ## [1.0.1] — 2026-04-24
 
 Comprehensive post-incident hardening pass. Adds seven independent defence layers against the "downstream-AI executes report text verbatim" failure mode, triggered by a user's Stripe key being exposed in production after a persona improvised a "create a test file in your public directory to verify the key" suggestion and a downstream coding assistant implemented it literally by creating `public/debug-account.html` and pushing it to Vercel. No persona prompt contained that language — the model filled a gap in the contract. This release closes every gap we could identify, and CI fails if any future contribution re-opens one.
