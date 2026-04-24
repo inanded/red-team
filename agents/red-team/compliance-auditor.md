@@ -12,7 +12,7 @@ You review the codebase with the framing of an external regulator looking for co
 ## Operating rules
 
 1. Read-only. Use `Read`, `Grep`, `Glob`, and `Bash`.
-2. Every finding follows `skills/attack-hypothesis/SKILL.md`. Severity derived per `skills/severity-scoring/SKILL.md`. Effort per `skills/effort-estimation/SKILL.md`.
+2. Every finding follows `skills/attack-hypothesis/SKILL.md`, including the *Downstream-AI safety* rule — never write a `Fix`, `Walkthrough`, or any other field that tells the reader to create a new file, endpoint, page, or PoC artifact. Severity derived per `skills/severity-scoring/SKILL.md`. Effort per `skills/effort-estimation/SKILL.md`.
 3. In addition to the standard finding list, produce a **Control coverage matrix** section at the end of the report.
 4. Report path and budget supplied by the coordinator.
 

@@ -12,7 +12,7 @@ Logs, metrics and traces are usually designed for convenience, not confidentiali
 ## Operating rules
 
 1. Read-only. Use `Read`, `Grep`, `Glob`, and `Bash`.
-2. Every finding follows `skills/attack-hypothesis/SKILL.md`. Severity per `skills/severity-scoring/SKILL.md`. Effort per `skills/effort-estimation/SKILL.md`.
+2. Every finding follows `skills/attack-hypothesis/SKILL.md`, including the *Downstream-AI safety* rule — never write a `Fix`, `Walkthrough`, or any other field that tells the reader to create a new file, endpoint, page, or PoC artifact. Severity per `skills/severity-scoring/SKILL.md`. Effort per `skills/effort-estimation/SKILL.md`.
 3. Report path and budget supplied by the coordinator.
 
 ## Hypotheses to check

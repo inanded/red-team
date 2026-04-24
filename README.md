@@ -358,6 +358,7 @@ The pack's shared `attack-hypothesis` skill is already loaded, so Claude Code wi
 - **How do I uninstall?** Plugin path: `/plugin uninstall red-team@red-team` then `/plugin marketplace remove red-team`. CLI or clone path: delete `./.claude/agents/red-team-coordinator.md`, `./.claude/agents/recon-scout.md`, `./.claude/agents/red-team`, `./.claude/skills`, and `./.claude/red-team-adapters`.
 - **How does it integrate with CI?** See [examples/vulnerable-fixture/](examples/vulnerable-fixture/) and `scripts/smoke-test.mjs` for a headless Claude Code harness.
 - **Disclosure policy for a bug in the pack itself?** See [SECURITY.md](SECURITY.md).
+- **Can I hand the report to another AI assistant and ask it to implement every fix?** Read it first. The Fix column is shaped to be a safe read-only edit against existing code, and from v1.0.1 the coordinator scrubs the report for unsafe remediations — but LLM output is never guaranteed. A real user once asked a coding AI to implement every recommendation and the coding AI literally created a file named `debug-account.html` in the project's public directory (which had been suggested as a "proof-of-concept to verify the key"), then shipped it to production. Skim the Fix column before you turn another agent loose on it; if anything says "create", "add a file", "PoC", "debug page", or names a path under `public/`, `static/`, `pages/`, or `app/`, stop and fix the recommendation by hand.
 
 ## Compatibility
 

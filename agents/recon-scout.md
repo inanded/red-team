@@ -26,6 +26,18 @@ You are the first agent in the review pipeline. You do not file any findings. Yo
 
 Run each probe in order. Record the result as a short labelled line in the profile.
 
+### Repository state (required; always first)
+
+Capture the state of the repository so that downstream readers — humans and AIs — can tell whether the report they are reading is current. Record these lines verbatim at the top of the profile under a `## Repository state` heading:
+
+- Commit SHA — `git rev-parse HEAD` (full SHA).
+- Branch — `git rev-parse --abbrev-ref HEAD`.
+- Commit date — `git log -1 --format=%cI HEAD`.
+- Dirty-tree flag — run `git status --porcelain`; record `clean` if empty, `dirty (N files uncommitted)` otherwise.
+- Profile date — today's date in `YYYY-MM-DD` form.
+
+If the target is not a git repository, record `not a git repository` for SHA and branch, and record the profile date. Coordinator uses these fields in every report's banner so stale reports applied against drifted code can be detected.
+
 ### Stack
 
 - Look for the top-level manifest: `package.json`, `pyproject.toml`, `Gemfile`, `go.mod`, `Cargo.toml`, `composer.json`, `build.gradle`.
@@ -107,6 +119,13 @@ Write the profile with this top-level structure:
 ```
 # Codebase profile — <target-name>
 Date: <YYYY-MM-DD>
+
+## Repository state
+Commit SHA: <full-sha>
+Branch: <branch>
+Commit date: <ISO 8601 from git log>
+Dirty tree: <clean | dirty (N files)>
+Profile captured: <YYYY-MM-DD>
 
 ## Stack
 ...

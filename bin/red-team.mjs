@@ -18,6 +18,7 @@
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import fs from "node:fs";
+import { spawnSync } from "node:child_process";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PACK_ROOT  = path.resolve(SCRIPT_DIR, "..");
@@ -29,6 +30,7 @@ const PERSONAS = [
   "social-supply-chain", "crypto-secrets-auditor", "compliance-auditor",
   "cloud-infra-attacker", "ai-llm-attacker", "race-condition-hunter",
   "api-versioning-attacker", "observability-attacker",
+  "third-party-trust-auditor",
 ];
 const SKILLS = [
   "attack-hypothesis", "severity-scoring", "effort-estimation",
@@ -52,6 +54,7 @@ Options
   --skills <a,b>             install only the named skills (comma-separated)
   --only-agents              skip skills
   --only-skills              skip agents (equivalent to npx skills behaviour)
+  --check-freshness <path>   check whether a report is stale relative to HEAD
   --list                     print available agents, skills, and adapters
   --help, -h                 show this message
 
@@ -79,6 +82,7 @@ function parseArgs(argv) {
   const out = {
     adapter: null, personas: null, skills: null,
     onlyAgents: false, onlySkills: false,
+    checkFreshness: null,
     list: false, help: false,
   };
   for (let i = 0; i < argv.length; i++) {
@@ -87,6 +91,7 @@ function parseArgs(argv) {
     else if (a === "--list") out.list = true;
     else if (a === "--only-agents") out.onlyAgents = true;
     else if (a === "--only-skills") out.onlySkills = true;
+    else if (a === "--check-freshness") out.checkFreshness = argv[++i];
     else if (a === "--adapter") out.adapter = argv[++i];
     else if (a === "--personas") out.personas = argv[++i].split(",").map((s) => s.trim()).filter(Boolean);
     else if (a === "--skills") out.skills = argv[++i].split(",").map((s) => s.trim()).filter(Boolean);
@@ -166,6 +171,11 @@ function main() {
 
   if (args.help)  { printHelp(); return; }
   if (args.list)  { printList(); return; }
+  if (args.checkFreshness) {
+    const script = path.join(PACK_ROOT, "scripts", "check-report-freshness.mjs");
+    const result = spawnSync("node", [script, args.checkFreshness], { stdio: "inherit" });
+    process.exit(result.status ?? 1);
+  }
 
   if (args.onlyAgents && args.onlySkills) {
     console.error("--only-agents and --only-skills are mutually exclusive");

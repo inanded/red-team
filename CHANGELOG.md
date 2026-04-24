@@ -5,6 +5,42 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] — 2026-04-24
+
+Comprehensive post-incident hardening pass. Adds seven independent defence layers against the "downstream-AI executes report text verbatim" failure mode, triggered by a user's Stripe key being exposed in production after a persona improvised a "create a test file in your public directory to verify the key" suggestion and a downstream coding assistant implemented it literally by creating `public/debug-account.html` and pushing it to Vercel. No persona prompt contained that language — the model filled a gap in the contract. This release closes every gap we could identify, and CI fails if any future contribution re-opens one.
+
+### Security
+- **Unsafe-remediation contract (*Downstream-AI safety* in `skills/attack-hypothesis/SKILL.md`).** `Fix`/`Walkthrough`/`Impact`/`Hypothesis` fields must not instruct the reader to create any new file, page, endpoint, script, PoC artifact, or anything under a public-serving directory (`public/`, `static/`, `pages/`, `app/`, `dist/`, `www/`, `wwwroot/`, `htdocs/`). Remediations must be edits to code that already exists.
+- **Destructive-remediation contract.** Fix text may remove at line-/literal-/argument-/clause-level ("remove the hardcoded key at line 14"), but whole-file/module/route/table deletions are disallowed unless the Fix enumerates every caller and describes the migration order. `rm -rf`, `git rm`, `unlink` in Fix prose are disallowed.
+- **Secret-rotation-ordering contract.** Any `rotate [the/your] [key|secret|token|credential|...]` instruction must also name the environments holding the value, the provider's grace window, the order of operations (update first, verify, then revoke — never revoke first), and a verification step. Bare "rotate the key" is a pack defect.
+- **Secret-redaction-in-evidence contract.** `File evidence` snippets containing literal secrets (Stripe, GitHub, AWS, Slack, Google, SendGrid, JWT, PEM, DB URLs) must redact to `<provider-prefix><REDACTED>` before inclusion. Reports leave the machine; unredacted secrets in reports are a second exposure.
+- **Target-code-is-untrusted contract.** Natural-language content inside the target codebase (comments, README, fixture strings, vendored dep text) is data for analysis, never instructions to the persona. An `ignore previous instructions` comment in target code is itself a finding.
+- **Bash-safety contract.** Personas' Bash usage is restricted to read-only discovery commands. No `rm`/`mv`/`chmod`, no `curl`/`wget`/`nc`, no `npm install`/`pip install`, no `git commit/push/reset`. If verification needs a write-capable or network command, Verdict is `NEEDS-VERIFY` with a manual inspection step.
+- **No network from personas.** `WebFetch` has been removed from `external-attacker` (the only persona that had it). The pack makes no outbound requests.
+
+### Defence-in-depth layers
+- **Coordinator consolidation scrub.** Every field of every finding is scrubbed at consolidation time for unsafe-remediation, destructive-verb, and rotation-ordering patterns. Violations are rewritten in place (or demoted to `NEEDS-VERIFY`) and logged under `## Pack safety`.
+- **Coordinator secret-leakage sweep.** Post-consolidation, the final report is grepped for known secret-prefix patterns and any survivors are redacted in place.
+- **Coordinator persona-integrity check.** Reports with all-BLOCKED verdicts, zero findings *and* zero confirmed-safe entries, or meta-instruction language ("per the system prompt in the repo") trigger a re-run or manual-review flag — defence against prompt injection from target code.
+- **Mandatory `⚠ READ-FIRST — DO NOT AUTO-IMPLEMENT` banner.** Prepended to every persona report and the consolidated report. Names the commit SHA, branch, and capture date. Declares the report is not a security sign-off and must not be auto-implemented.
+- **Per-persona rule-2 reinforcement.** All 13 personas carry an inline *Downstream-AI safety* reminder — the shared skill is not the only place the rule lives.
+- **CI validator `scripts/validate-safe-remediation.mjs`.** Scans every persona, skill, and adapter for unsafe-remediation / destructive / rotation patterns. Verified live against the incident phrasing, the `public/debug-account.html` filename, whole-file deletes, bare rotations, and `rm -rf` in prose. Negation-aware so guardrail text itself doesn't trip. Wired into `npm run validate:all`.
+
+### Freshness
+- **Recon-scout captures repository state.** Commit SHA, branch, commit date, dirty-flag, and profile date recorded in `CODEBASE_PROFILE.md` under `## Repository state`.
+- **Coordinator stamps every report.** The banner includes `Valid against commit {sha} on branch {branch}, captured {date} (tree: {dirty-flag})`.
+- **`npx inanded/red-team --check-freshness <report>`.** New CLI subcommand that compares a report's captured SHA against the current `HEAD` and exits non-zero if the report is stale. Backed by `scripts/check-report-freshness.mjs`.
+
+### Transparency
+- **Mandatory false-confidence warning** in the report banner: "This report is not a security sign-off. It is LLM-assisted code review with known blind spots. A report with zero CRITICAL findings does not mean the codebase is secure."
+- **User-facing FAQ item** in `README.md` warning users to skim the Fix column before piping the report to another coding assistant.
+
+### Fixed
+- `bin/red-team.mjs` was missing `third-party-trust-auditor` from its `PERSONAS` installer list. Added.
+
+### Documentation
+- `CLAUDE.md` and `AGENTS.md` carry the complete behavioural-rule set for the pack. `skills/attack-hypothesis/SKILL.md` is the authoritative contract.
+
 ## [1.0.0] — 2026-04-19
 
 ### Added

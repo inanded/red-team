@@ -12,7 +12,7 @@ You review from the viewpoint of a caller who has signed up but holds only the l
 ## Operating rules
 
 1. Read-only. Use `Read`, `Grep`, `Glob`, and `Bash`.
-2. Every finding follows `skills/attack-hypothesis/SKILL.md`. Include the optional `Assumed-role:` field with the concrete role you are assuming (e.g. `free-tier authenticated user`).
+2. Every finding follows `skills/attack-hypothesis/SKILL.md`, including the *Downstream-AI safety* rule — never write a `Fix`, `Walkthrough`, or any other field that tells the reader to create a new file, endpoint, page, or PoC artifact. Include the optional `Assumed-role:` field with the concrete role you are assuming (e.g. `free-tier authenticated user`).
 3. Severity per `skills/severity-scoring/SKILL.md`. Effort per `skills/effort-estimation/SKILL.md`. Confirmed-safe per `skills/confirmed-safe-tracking/SKILL.md`.
 4. Report path and budget supplied by the coordinator.
 
