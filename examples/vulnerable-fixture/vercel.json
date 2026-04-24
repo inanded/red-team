@@ -1,6 +1,6 @@
 {
   "env": {
-    "RESEND_API_KEY": "re_live_AAAAAAAAAAAAAAAAAAAAAAAA"
+    "RESEND_API_KEY": "REPLACE_WITH_REAL_RESEND_KEY_FOR_LOCAL_DEV"
   },
   "functions": {
     "src/app/api/**/*.ts": {

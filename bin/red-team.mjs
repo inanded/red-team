@@ -55,6 +55,8 @@ Options
   --only-agents              skip skills
   --only-skills              skip agents (equivalent to npx skills behaviour)
   --check-freshness <path>   check whether a report is stale relative to HEAD
+  --check-safety <path>      scan a report for unsafe-remediation patterns
+                             before piping it into another coding assistant
   --list                     print available agents, skills, and adapters
   --help, -h                 show this message
 
@@ -82,7 +84,7 @@ function parseArgs(argv) {
   const out = {
     adapter: null, personas: null, skills: null,
     onlyAgents: false, onlySkills: false,
-    checkFreshness: null,
+    checkFreshness: null, checkSafety: null,
     list: false, help: false,
   };
   for (let i = 0; i < argv.length; i++) {
@@ -92,6 +94,7 @@ function parseArgs(argv) {
     else if (a === "--only-agents") out.onlyAgents = true;
     else if (a === "--only-skills") out.onlySkills = true;
     else if (a === "--check-freshness") out.checkFreshness = argv[++i];
+    else if (a === "--check-safety") out.checkSafety = argv[++i];
     else if (a === "--adapter") out.adapter = argv[++i];
     else if (a === "--personas") out.personas = argv[++i].split(",").map((s) => s.trim()).filter(Boolean);
     else if (a === "--skills") out.skills = argv[++i].split(",").map((s) => s.trim()).filter(Boolean);
@@ -174,6 +177,11 @@ function main() {
   if (args.checkFreshness) {
     const script = path.join(PACK_ROOT, "scripts", "check-report-freshness.mjs");
     const result = spawnSync("node", [script, args.checkFreshness], { stdio: "inherit" });
+    process.exit(result.status ?? 1);
+  }
+  if (args.checkSafety) {
+    const script = path.join(PACK_ROOT, "scripts", "check-report-safety.mjs");
+    const result = spawnSync("node", [script, args.checkSafety], { stdio: "inherit" });
     process.exit(result.status ?? 1);
   }
 

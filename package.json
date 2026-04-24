@@ -1,6 +1,6 @@
 {
   "name": "@inanded/red-team",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": false,
   "license": "MIT",
   "description": "Claude Code security-review pack: thirteen reviewer personas, coordinator, recon scout, seven skills, and seven stack adapters.",
@@ -42,6 +42,8 @@
     "scripts/install.sh",
     "scripts/install.ps1",
     "scripts/check-report-freshness.mjs",
+    "scripts/check-report-safety.mjs",
+    "scripts/lib/unsafe-remediation-patterns.mjs",
     "AGENTS.md",
     "CHANGELOG.md",
     "CODE_OF_CONDUCT.md",

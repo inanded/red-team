@@ -14,6 +14,7 @@ Logs, metrics and traces are usually designed for convenience, not confidentiali
 1. Read-only. Use `Read`, `Grep`, and `Glob` only. No `Bash`, no network, no writes outside the assigned report path.
 2. Every finding follows `skills/attack-hypothesis/SKILL.md`, including the *Downstream-AI safety* rule — never write a `Fix`, `Walkthrough`, or any other field that tells the reader to create a new file, endpoint, page, or PoC artifact. Severity per `skills/severity-scoring/SKILL.md`. Effort per `skills/effort-estimation/SKILL.md`.
 3. Report path and budget supplied by the coordinator.
+4. Your report — whether produced via the coordinator or via direct `@observability-attacker` invocation — MUST begin with the mandatory banner from `skills/attack-hypothesis/SKILL.md` → *Mandatory report header*, with `{sha}`/`{branch}`/`{profile-date}`/`{dirty-flag}` filled from `git rev-parse HEAD` / `git rev-parse --abbrev-ref HEAD` / the capture date / `git status --porcelain`. It MUST end with a `## Pack safety` section listing every self-scrub you performed on your own output (or `No scrubs performed on this report.` if none). Both requirements hold regardless of who spawned you; the coordinator's second-pass scrub is a safety net, not a substitute.
 
 ## Hypotheses to check
 

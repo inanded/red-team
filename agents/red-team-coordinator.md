@@ -128,7 +128,7 @@ Reject or rewrite any field — `Fix`, `Walkthrough`, `Impact`, `Hypothesis`, an
 
 - "create", "add a file", "add a page", "add an endpoint", "add a route", "drop in a script", "scaffold", "generate a file"
 - "proof of concept", "PoC", "to verify", "test file", "debug file", "debug page", "debug endpoint", "sample page"
-- any path starting `public/`, `static/`, `pages/`, `app/`, `dist/`, `www/`, `wwwroot/`, `htdocs/` where the text implies adding rather than editing or inspecting
+- any path starting `public/`, `static/`, `dist/`, `www/`, `wwwroot/`, `htdocs/` where the text implies adding rather than editing or inspecting; also `pages/` or `app/` when the filename is **not** one of `route.ts`/`route.js`/`page.tsx`/`page.jsx`/`layout.tsx`/`layout.jsx`/`loading.tsx`/`error.tsx`/`not-found.tsx` (those are legitimate Next.js route/page/layout files; edits to them are fine — creation of *other* filenames under `pages/` or `app/` is the risk)
 - anything that involves running the vulnerable primitive against a live service or production credential
 - shell commands prefixed with `$`, `>`, or fenced as ```bash / ```sh that the reader is told to "run" against their system
 
@@ -199,6 +199,13 @@ lin_api_[A-Za-z0-9]{16,}              # Linear API key
 # Vercel tokens are 24-char alphanumeric with no distinguishing prefix — context-dependent;
 # match [A-Za-z0-9]{24} only when assigned to VERCEL_TOKEN= / VERCEL_API_TOKEN= / similar.
 (?:secret|token|key|password|apikey|api_key)\s*[:=]\s*["'][A-Za-z0-9_\-+/=]{32,}["']  # generic high-entropy assignment catch-all
+re_(live|test)_[A-Za-z0-9]{16,}           # Resend API key
+glpat-[A-Za-z0-9_-]{20,}                   # GitLab personal access token
+pplx-[A-Za-z0-9]{16,}                      # Perplexity API key
+gsk_[A-Za-z0-9]{16,}                       # Groq API key
+hf_[A-Za-z0-9]{16,}                        # HuggingFace token
+FlyV1\s+fm2_[A-Za-z0-9_+/=]{16,}           # Fly.io auth token
+"[A-Z_]+(?:_SECRET|_TOKEN|_KEY|_PASSWORD|_APIKEY|_API_KEY)"\s*:\s*"[A-Za-z0-9_\-+/=]{16,}"   # JSON-quoted secret assignment (catches "RESEND_API_KEY": "..." which the generic plain-text catch-all misses)
 ```
 
 Redact by keeping the provider-identifying prefix (first 8 characters) and replacing the rest with `<REDACTED>`. JWT: keep `eyJ…<REDACTED>`. PEM: keep BEGIN/END lines, `<REDACTED PRIVATE KEY BODY>` the body. DB URLs: replace the userinfo section with `<REDACTED>@`.

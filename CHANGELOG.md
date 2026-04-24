@@ -5,6 +5,48 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] — 2026-04-24
+
+A follow-up security review of v1.0.2 surfaced 11 findings (rt2-01 through rt2-11); this release addresses 10 of them and documents the 11th (rt2-05's Slack paste degradation is mitigated in code, the user-research verification remains open).
+
+### Security (rt2-01)
+- **Validator verb list expanded** with `build`, `make`, `construct`, `stub (out)`, `author`, `compose`, `produce`, `whip up`, `put together`, `throw together`, `place`, `put`, `set up`, `deploy`, `implement`, `emit`, `publish`, `touch`. Same expansion applied to the "to verify, ... create" construction and to the multi-line variant. Catches "build a helper class", "stub out a new endpoint", "compose a debug page" etc.
+- Noun list accepts plural forms (`files?`, `pages?`, `routes?`, `endpoints?`, `scripts?`, `artifacts?`) and fixes the `helper class(es)?` typo (was `helper\s+classes?` which matched "classe"/"classes" but not "class").
+
+### Security (rt2-02)
+- **Runtime report scanner.** `scripts/check-report-safety.mjs` applies the same pattern library as the CI validator to a generated report file. Shared patterns live in `scripts/lib/unsafe-remediation-patterns.mjs` so the CI and runtime scanners stay in sync. Wired into the CLI as `npx inanded/red-team --check-safety <report-path>`. Closes the gap that `npm run validate` only scans committed pack text, never `docs/red-team-*/`.
+
+### Security (rt2-03)
+- **Coordinator secret-leakage sweep expanded** with Resend (`re_(live|test)_`), GitLab PAT (`glpat-`), Perplexity (`pplx-`), Groq (`gsk_`), HuggingFace (`hf_`), Fly.io (`FlyV1 fm2_`), plus a JSON-quoted-key variant of the generic catch-all that catches `"RESEND_API_KEY": "..."` which the plaintext catch-all missed.
+- `skills/attack-hypothesis/SKILL.md` → *Secret redaction in evidence* adds `re_live_`, `re_test_`, `glpat-`, `pplx-`, `gsk_`, `hf_` to the persona-side redaction rules so personas catch these prefixes before the coordinator sweep has to.
+
+### Security (rt2-04)
+- **Every persona inlines the banner-and-Pack-safety requirement** in its own Operating rules. A direct `@<persona>` invocation now gets the full contract inline; the persona cannot silently omit the banner or the `## Pack safety` section on the assumption that the coordinator will add them. Applied to all 13 personas.
+
+### Security (rt2-05)
+- **Plain-text `[DO NOT AUTO-IMPLEMENT]` token repeated in every banner paragraph and in every Fix's advisory sentence.** Survives plain-text paste into Slack, Linear, email, PDF export, and any other channel that strips markdown emphasis. A reader scanning the document grep-style sees the token at every finding row even when the header is gone.
+
+### Security (rt2-06)
+- **Smoke test is no longer a pure stub.** `scripts/smoke-test.mjs` now parses `examples/vulnerable-fixture/EXPECTED_FINDINGS.md`, cross-references against the installer's `PERSONAS` list, and verifies every anchor file named in the oracle actually exists on disk. Catches three classes of regression that previously sailed past CI: a persona added without an oracle row, an oracle row naming a deleted fixture file, and an oracle row naming a persona that is no longer in the installer. Headless Claude Code run remains a documented TODO. `CLAUDE.md` updated to describe reality rather than the aspirational full-harness claim.
+
+### Security (rt2-07)
+- **Rotation-class validator pattern is now paragraph-scoped** (multiline). A Fix that says `Rotate the Stripe key.` on line 1 and provides the ordering on lines 2-5 is correctly recognised as complete, rather than false-flagged by the old line-based scan.
+
+### Security (rt2-08)
+- **Destructive-verb list expanded** with `deprecate`, `retire`, `archive`, `sunset`, `decommission`, `obsolete`, `kill`, `nuke`. Determiner is optional (`remove legacy auth middleware` now trips). Catches softer deletion verbs a downstream AI will still interpret as delete.
+
+### Security (rt2-09)
+- **Fixture `vercel.json` placeholder hardened.** Replaced the literal `re_live_AAAAAAAAAAAAAAAAAAAAAAAA` with `REPLACE_WITH_REAL_RESEND_KEY_FOR_LOCAL_DEV`. The fixture's `cloud-infra-attacker` finding still anchors correctly (by env-var name, not literal). A user who `vercel --force` deploys the fixture can no longer push a real-looking Resend key.
+
+### Security (rt2-10)
+- **Coordinator scrub checklist whitelists legitimate Next.js route/page/layout filenames.** Editing `app/api/users/[id]/route.ts` is the *intended* remediation for many findings; the old rule flagged any text touching `app/` or `pages/` as suspicious. Now only flags when the path names a file that is NOT `route.*`/`page.*`/`layout.*`/`loading.*`/`error.*`/`not-found.*`. Mirrored in the validator regex.
+
+### Documentation (rt2-11)
+- **README FAQ** explicitly disclaims `--check-freshness` as non-cryptographic, names what it does and doesn't verify, and recommends pairing with `--check-safety`. Also adds a FAQ entry describing the new `--check-safety` CLI and when to run it.
+
+### Shared infrastructure
+- **New module `scripts/lib/unsafe-remediation-patterns.mjs`** — single source of truth for `PATTERNS`, `NEGATION_MARKERS`, `isAntiInstruction`, and `scanText`. Both CI validator and runtime scanner import from here; adding a new pattern no longer requires touching two files.
+
 ## [1.0.2] — 2026-04-24
 
 A security review of v1.0.1 surfaced 14 residual risks (rt-01 through rt-14). This release addresses all 14.

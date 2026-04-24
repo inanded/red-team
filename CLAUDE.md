@@ -14,7 +14,7 @@ See [README.md](./README.md) for what this is, [CONTRIBUTING.md](./CONTRIBUTING.
 - **No network calls from personas.** The pack does not make outbound requests. `WebFetch` has been removed from every persona; if you re-introduce it, update `skills/attack-hypothesis/SKILL.md` and document why.
 - **Never create files unless required.** Prefer editing existing files. Never write markdown to the repo root — use `docs/`, `agents/red-team/`, `skills/`, `adapters/`, or `examples/`.
 - **Never skip validators.** Before committing changes to `agents/`, `skills/`, or `adapters/`: `npm run validate:all`. Frontmatter, links, and cross-refs must resolve.
-- **Every new persona needs a fixture vuln.** Phase-8 smoke test asserts coverage — adding a persona without a planted vuln in `examples/vulnerable-fixture/` will fail CI.
+- **Every new persona needs a fixture vuln.** `npm run test:smoke` enforces two static-level invariants today: every persona listed in `bin/red-team.mjs` must have at least one row in `examples/vulnerable-fixture/EXPECTED_FINDINGS.md`, and every anchor file named in that oracle must exist on disk. Adding a persona without a planted defect fails CI. The full headless Claude Code run (spawn coordinator, parse consolidated report, match each row's severity) is tracked as a TODO in `scripts/smoke-test.mjs`; severity-level regressions are not yet caught in CI.
 - **Never commit** `.env`, `.mcp.json`, `.claude/`, `.claude-flow/`, or any file under `docs/red-team-*/` — all gitignored.
 
 ## Minimum Claude Code version

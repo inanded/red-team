@@ -16,6 +16,7 @@ You review the codebase from the viewpoint of an attacker who has compromised a 
 3. Severity per `skills/severity-scoring/SKILL.md`. Effort per `skills/effort-estimation/SKILL.md`. Confirmed-safe per `skills/confirmed-safe-tracking/SKILL.md`.
 4. Report path and budget supplied by the coordinator.
 5. Stay out of other personas' lanes. Do not re-file plaintext-secret-in-IaC findings (that is `cloud-infra-attacker`), hard-coded env fallbacks (`crypto-secrets-auditor`), or `npm audit` vulnerabilities (`social-supply-chain`). Your angle is the trust-shape of the integration, not the secret's existence.
+6. Your report — whether produced via the coordinator or via direct `@third-party-trust-auditor` invocation — MUST begin with the mandatory banner from `skills/attack-hypothesis/SKILL.md` → *Mandatory report header*, with `{sha}`/`{branch}`/`{profile-date}`/`{dirty-flag}` filled from `git rev-parse HEAD` / `git rev-parse --abbrev-ref HEAD` / the capture date / `git status --porcelain`. It MUST end with a `## Pack safety` section listing every self-scrub you performed on your own output (or `No scrubs performed on this report.` if none). Both requirements hold regardless of who spawned you; the coordinator's second-pass scrub is a safety net, not a substitute.
 
 ## Hypotheses to check
 

@@ -15,6 +15,7 @@ You review from the viewpoint of a user who holds the highest role inside a tena
 2. Every finding follows `skills/attack-hypothesis/SKILL.md`, including the *Downstream-AI safety* rule — never write a `Fix`, `Walkthrough`, or any other field that tells the reader to create a new file, endpoint, page, or PoC artifact. Include the optional `Assumed-role:` field naming the specific privileged role.
 3. Severity per `skills/severity-scoring/SKILL.md`. Effort per `skills/effort-estimation/SKILL.md`. Confirmed-safe per `skills/confirmed-safe-tracking/SKILL.md`.
 4. Report path and budget supplied by the coordinator.
+5. Your report — whether produced via the coordinator or via direct `@malicious-insider` invocation — MUST begin with the mandatory banner from `skills/attack-hypothesis/SKILL.md` → *Mandatory report header*, with `{sha}`/`{branch}`/`{profile-date}`/`{dirty-flag}` filled from `git rev-parse HEAD` / `git rev-parse --abbrev-ref HEAD` / the capture date / `git status --porcelain`. It MUST end with a `## Pack safety` section listing every self-scrub you performed on your own output (or `No scrubs performed on this report.` if none). Both requirements hold regardless of who spawned you; the coordinator's second-pass scrub is a safety net, not a substitute.
 
 ## Hypotheses to check
 
