@@ -6,6 +6,8 @@ Point it at your project and within 10–20 minutes you get a prioritised list o
 
 Not a replacement for a real security audit or for tools like Snyk. Think of it as a thorough first pass that catches the obvious things before a human reviewer gets involved.
 
+> **⚠ Review every finding before you act on it.** Reports produced by this pack are advisory LLM-assisted analysis — every recommendation, including each `Fix`, must be read by a human and verified in a non-production environment before the change is committed or deployed. **Do not paste a report into another AI coding assistant and ask it to apply changes automatically.** You are responsible for any change made to your codebase as a result of running this pack. Full terms in the [Disclaimer](#disclaimer) section.
+
 Found a bug? [Open an issue](https://github.com/inanded/red-team/issues). Want a new persona, skill, or adapter? [Open a PR](#contributing).
 
 ---
@@ -412,6 +414,23 @@ Plain-English definitions for the jargon used throughout the reports and this RE
 | **HMAC** | A way of signing a message so the recipient can verify it has not been tampered with. Used by most webhook providers. |
 | **SECURITY DEFINER** | A Postgres function attribute that makes the function run with its owner's privileges instead of the caller's. Easy to misuse. |
 | **path:line** | The citation format every finding uses, for example `src/lib/auth.ts:42`. Click the link in your editor to jump straight to the relevant line. |
+
+## Disclaimer
+
+This pack runs LLM-assisted security review. It is **not** a substitute for a qualified human reviewer, a professional penetration test, or any form of compliance certification. The reports it produces are advisory output that may contain false positives, miss real issues, or recommend changes that are inappropriate for your specific codebase, deployment, customers, or compliance posture.
+
+**Before acting on anything in a generated report you must:**
+
+- Read each finding end-to-end and confirm the cited `path:line` matches the issue described.
+- Treat every `Fix` field as a suggestion to evaluate, not an instruction to execute. Apply changes manually, or have a human review the diff before any tool — AI or otherwise — applies it.
+- Verify the change in a non-production environment before merging or deploying.
+- For any recommendation involving secrets, deployments, deletions, infrastructure, or external services, follow your team's normal change-management process. Treat the recommendation as a suggestion you would receive from a colleague, not a directive from the tool.
+
+**Do not feed a report into another AI coding assistant with an instruction to "apply all the fixes" without per-finding human review.** Coding assistants execute prose literally; an unreviewed recommendation can introduce changes you did not intend. The pack ships defence-in-depth helpers (`--check-safety`, `--check-freshness`, per-Fix advisory tokens, the `## Pack safety` audit section) — these are layered safeguards, not a substitute for reading the report.
+
+This software is provided **AS IS** under the MIT License (see [LICENSE](LICENSE)), without warranty of any kind, express or implied. To the maximum extent permitted by applicable law, the maintainer disclaims all liability for any loss, damage, exposure of credentials, data loss, downtime, regression, or other harm arising from running this pack, acting on its output, or having another tool act on its output on your behalf. You and your team are solely responsible for evaluating each recommendation, performing whatever validation you require, and bearing the consequences of any change you choose to apply.
+
+If you are not comfortable with these terms, do not use this pack.
 
 ## License
 
